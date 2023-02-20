@@ -104,6 +104,6 @@ void BoardStateHandler::prettyPrint() {
     Serial.print(board->bumpers[i].hit);
     Serial.print(" tolerance: ");
     Serial.print(board->bumpers[i].tolerance);
-
+    Serial.println("");
   }
 }

@@ -3,7 +3,7 @@
   "compilerOptions": {
     "outDir": "../out-tsc/app",
     "module": "es2015",
-    "types": ["w3c-web-usb"]
+    "types": ["w3c-web-usb", "w3c-web-serial"]
   },
   "exclude": [
     "src/test.ts",

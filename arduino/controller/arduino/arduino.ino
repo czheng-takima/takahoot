@@ -1,4 +1,6 @@
-#include "WebUSB.h"
+// #include <WebUSB.h>
+
+// #include "WebUSB.h"
 
 #include "configuration.h"
 #include "SerialClient.h"
@@ -20,6 +22,12 @@ SerialClient serialClient = SerialClient();
 BumperController ctrl = BumperController(&board, &spiClient, &serialClient);
 
 void setup() {
+  #ifdef DEBUG_MODE
+    Serial.begin(BAUD_RATE);
+    while(!Serial);
+    delay(1000);
+    Serial.println("started");
+  #endif
   ctrl.init();
 }
 

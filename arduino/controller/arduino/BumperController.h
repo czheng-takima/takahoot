@@ -1,5 +1,5 @@
 #include <Arduino.h>
-#include <FastLED.h>
+// #include <FastLED.h>
 #include <SPI.h>
 
 struct Board;

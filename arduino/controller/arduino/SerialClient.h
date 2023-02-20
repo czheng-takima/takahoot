@@ -1,7 +1,8 @@
 #include <Arduino.h>
-#include <WebUSB.h>
-#include "configuration.h"
+//#include <WebUSB.h>
+#include <USBAPI.h>
 
+#include "configuration.h"
 class BumperController;
 
 
@@ -46,5 +47,6 @@ private:
   void processCommand();
   const byte END_MESSAGE[2] = { 0x0D, 0x0A };
   const byte END_MESSAGE_SIZE = 2;
-  WebUSB WebUSBSerial = {WEBUSB_PROTOCOL, WEBUSB_HOST};
+  //WebUSB WebUSBSerial = {WEBUSB_PROTOCOL, WEBUSB_HOST};
+  Serial_ WebUSBSerial = Serial_();
 };
