@@ -1,10 +1,9 @@
 import {Bumper} from './bumper.model';
+import { SerialConnection } from '../../shared/services/webserial.service';
 
 export interface Target {
   index: number;
   name: string;
-  claimed: boolean;
-  connected: boolean;
-  device: USBDevice;
+  connection: SerialConnection;
   state: Bumper[];
 }

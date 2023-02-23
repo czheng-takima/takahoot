@@ -2,6 +2,9 @@ import { Injectable } from '@angular/core';
 import { from, Observable, of, Subject, throwError } from 'rxjs';
 import { catchError, switchMap } from 'rxjs/operators';
 
+const CARRIAGE_RETURN = 0x0D;
+const LINE_FEED = 0x0A;
+
 const ARDUINO_VENDOR_ID = 0x2341;
 const ARDUINO_PRODUCT_ID = 0x8036;
 
@@ -9,6 +12,7 @@ export interface SerialConnection {
   port: SerialPort;
   readSubject: Subject<Uint8Array>;
   writeSubject: Subject<Uint8Array>;
+  index: number;
 }
 
 @Injectable({
@@ -16,6 +20,7 @@ export interface SerialConnection {
 })
 export class WebSerialService {
   private connections: SerialConnection[] = [];
+  private connectionCount = 0;
 
   requestPort(): Observable<SerialConnection> {
     if (!("serial" in navigator)) {
@@ -26,12 +31,23 @@ export class WebSerialService {
       usbProductId: ARDUINO_PRODUCT_ID,
       usbVendorId: ARDUINO_VENDOR_ID
     };
-    return from(navigator.serial.requestPort({ filters: [filters] })).pipe(
+    const requestedPort = from(navigator.serial.requestPort({ filters: [filters] }));
+    const openedPort = requestedPort.pipe(
       switchMap(port => {
+        port.open({ baudRate: 115200 });
+        return of(port);
+      })
+    );
+    const serialConnection = openedPort.pipe(
+      switchMap(port => {
+        const infos = port.getInfo();
+        console.log("🚀 ~ file: webserial.service.ts:38 ~ WebSerialService ~ requestPort ~ infos:", infos)
+
         const connection: SerialConnection = {
           port,
           readSubject: this.createSerialPortReadSubject(port),
-          writeSubject: this.createSerialPortWriteSubject(port)
+          writeSubject: this.createSerialPortWriteSubject(port),
+          index: this.connectionCount++
         };
         this.connections.push(connection);
         return of(connection);
@@ -41,12 +57,13 @@ export class WebSerialService {
         return throwError(err);
       })
     );
+    return serialConnection;
   }
 
   private createSerialPortReadSubject(port: SerialPort): Subject<Uint8Array> {
     const subject = new Subject<Uint8Array>();
 
-    if (!port || !port.readable) {
+    if (!port || !port) {
       throw new Error('Invalid or closed SerialPort.');
     }
 
@@ -103,6 +120,16 @@ export class WebSerialService {
         this.connections.splice(index, 1);
       }
     }
+  }
+
+  sendToDevice(index: number, message: number[]) {
+    const connection = this.connections[index];
+    if (!connection) {
+      console.error('No connection found for index', index);
+      return of(false);
+    }
+    connection.writeSubject.next(new Uint8Array([...message, CARRIAGE_RETURN, LINE_FEED]));
+    return of(true);
   }
 
 }

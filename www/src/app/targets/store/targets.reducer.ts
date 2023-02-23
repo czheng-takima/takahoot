@@ -1,21 +1,21 @@
+import { Target } from '../models/target.model';
 import { TargetsActions, TargetsActionTypes } from './targets.actions';
 import { targetsInitialState, TargetsState } from './targets.state';
-import {Target} from '../models/target.model';
 
 const MESSAGE_LOG_MAX_SIZE = 1000;
 
 export function targetsReducer(state = targetsInitialState, action: TargetsActions): TargetsState {
   switch (action.type) {
 
-    case TargetsActionTypes.TARGETS_QUERY: {
+    case TargetsActionTypes.TARGET_ESTABLISH_CONNECTION: {
       return Object.assign({}, state, {
         loading: true,
       });
     }
 
-    case TargetsActionTypes.TARGETS_LOADED: {
+    // @ts-ignore
+    case TargetsActionTypes.TARGET_ESTABLISH_CONNECTION_SUCCESS: {
       return Object.assign({}, state, {
-        targets: action.payload.targets,
         loading: false,
       });
     }
@@ -28,8 +28,8 @@ export function targetsReducer(state = targetsInitialState, action: TargetsActio
       messageLog.push(action.payload.message);
       let targets: Target[] = [];
       state.targets.forEach((s, i) => {
-        if (action.payload.targetIndex === i && action.payload.message.state) {
-          let t = Object.assign({}, s, {state: action.payload.message.state, connected: true});
+        if (action.payload.target.index === i && action.payload.message.state) {
+          let t = Object.assign({}, s, { state: action.payload.message.state, connected: true });
           // Specificity for computer connected
           targets.push(t);
         } else {
