@@ -5,7 +5,7 @@ import { Target } from '../models/target.model';
 
 export enum TargetsActionTypes {
   TARGET_ESTABLISH_CONNECTION = '[Targets] Establish connection',
-  TARGET_ESTABLISH_CONNECTION_SUCCESS = '[Targets] Establish connection success',
+  TARGET_CONNECTION_SUCCESS = '[Targets] Establish connection success',
   TARGETS_ERROR = '[Targets] Targets error',
   TARGET_SEND_MESSAGE = '[Targets] Sending message',
   TARGET_INBOUND_MESSAGE_RECEIVED = '[Targets] Target inbound message received',
@@ -14,14 +14,10 @@ export enum TargetsActionTypes {
 
 export class TargetEstablishConnection implements Action {
   readonly type = TargetsActionTypes.TARGET_ESTABLISH_CONNECTION;
-  constructor(public payload: {
-    target: Target
-  }) {
-  }
 }
 
 export class TargetEstablishConnectionSuccess implements Action {
-  readonly type = TargetsActionTypes.TARGET_ESTABLISH_CONNECTION;
+  readonly type = TargetsActionTypes.TARGET_CONNECTION_SUCCESS;
   constructor(public payload: {
     target: Target
   }) {

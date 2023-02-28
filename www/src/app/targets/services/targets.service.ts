@@ -54,43 +54,43 @@ export class TargetsService {
   }
 
   connect(target: Target): Observable<boolean> {
-    return this.webSerialService.sendToDevice(target.index, [IN_COMPUTER_CONNECTED]);
+    return this.webSerialService.send(target.connection, [IN_COMPUTER_CONNECTED]);
   }
 
   reset(target: Target): Observable<boolean> {
-    return this.webSerialService.sendToDevice(target.index, [IN_COMPUTER_RESET]);
+    return this.webSerialService.send(target.connection, [IN_COMPUTER_RESET]);
   }
 
   startCalibration(target: Target, bumperId: number): Observable<boolean> {
-    return this.webSerialService.sendToDevice(target.index, [IN_COMPUTER_START_CALIBRATION, bumperId]);
+    return this.webSerialService.send(target.connection, [IN_COMPUTER_START_CALIBRATION, bumperId]);
   }
 
   changeTolerance(target: Target, bumperId: number, tolerance: number) {
-    return this.webSerialService.sendToDevice(target.index, [IN_COMPUTER_CHANGE_TOLERANCE, bumperId, tolerance]);
+    return this.webSerialService.send(target.connection, [IN_COMPUTER_CHANGE_TOLERANCE, bumperId, tolerance]);
   }
 
   enableBumper(target: Target, bumperId: number) {
-    return this.webSerialService.sendToDevice(target.index, [IN_COMPUTER_ENABLE_BUMPER, bumperId]);
+    return this.webSerialService.send(target.connection, [IN_COMPUTER_ENABLE_BUMPER, bumperId]);
   }
 
-  private enableBumpers(target: Target) {
-    return this.webSerialService.sendToDevice(target.index, [IN_COMPUTER_ENABLE_BUMPERS]);
+  enableBumpers(target: Target) {
+    return this.webSerialService.send(target.connection, [IN_COMPUTER_ENABLE_BUMPERS]);
   }
 
   disableBumper(target: Target, bumperId: number) {
-    return this.webSerialService.sendToDevice(target.index, [IN_COMPUTER_DISABLE_BUMPER, bumperId]);
+    return this.webSerialService.send(target.connection, [IN_COMPUTER_DISABLE_BUMPER, bumperId]);
   }
 
   disableBumperAndBlink(target: Target, bumperId: number) {
-    return this.webSerialService.sendToDevice(target.index, [IN_COMPUTER_DISABLE_BUMPER_AND_BLINK, bumperId]);
+    return this.webSerialService.send(target.connection, [IN_COMPUTER_DISABLE_BUMPER_AND_BLINK, bumperId]);
   }
 
   disableBumpersAndBlink(target: Target) {
-    return this.webSerialService.sendToDevice(target.index, [IN_COMPUTER_DISABLE_BUMPERS_AND_BLINK]);
+    return this.webSerialService.send(target.connection, [IN_COMPUTER_DISABLE_BUMPERS_AND_BLINK]);
   }
 
   getState(target: Target): Observable<boolean> {
-    return this.webSerialService.sendToDevice(target.index, [IN_COMPUTER_GET_STATE]);
+    return this.webSerialService.send(target.connection, [IN_COMPUTER_GET_STATE]);
   }
 
   readInboundMessages(target: Target): Observable<TargetInboundMessage> {
@@ -126,6 +126,7 @@ export class TargetsService {
   }
 
   sendMessage(message: TargetOutboundMessage, target: Target): Observable<boolean> {
+    console.log("🚀 ~ file: targets.service.ts:129 ~ TargetsService ~ sendMessage ~ message:", message)
     switch (message.code) {
       case IN_COMPUTER_CONNECTED:
         return this.connect(target);

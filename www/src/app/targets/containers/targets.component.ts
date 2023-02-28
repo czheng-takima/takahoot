@@ -2,7 +2,8 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { select, Store } from '@ngrx/store';
 import { MDBModalRef } from 'angular-bootstrap-md';
 import { Observable, Subscription } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { distinctUntilKeyChanged, map } from 'rxjs/operators';
+import { WebSerialService } from 'src/app/shared/services/webserial.service';
 import { AppState } from '../../reducers/index';
 import {
   IN_COMPUTER_CONNECTED,
@@ -37,55 +38,64 @@ export class TargetsComponent implements OnInit, OnDestroy {
     class: 'modal-dialog-centered'
   };
 
-  constructor(private store: Store<AppState>, private targetsService: TargetsService) {
+  constructor(private store: Store<AppState>, private targetsService: TargetsService, private webSerialService: WebSerialService) {
   }
 
   ngOnInit() {
-    // this.isLoading$ = this.store.select(getAllLoaded);
-    // this.targets$ = this.store.pipe(
-    //   select(getTargets),
-    //   map((targets: Target[]) => {
-    //     if (!targets || targets.length === 0) {
-    //       this.store.dispatch(new fromTargets.TargetsRefresh());
-    //     }
-    //     this.updateSubscriptions(targets);
-    //     this.targets = targets;
-    //     return targets;
-    //   })
-    // );
+    this.isLoading$ = this.store.select(getAllLoaded);
+    this.targets$ = this.store.pipe(
+      select(getTargets),
+      map((targets: Target[]) => {
+        if (!targets || targets.length === 0) {
+          this.store.dispatch(new fromTargets.TargetsRefresh());
+        }
+        this.updateSubscriptions(targets);
+        this.targets = targets;
+        return targets;
+      })
+    );
   }
 
   async testButton() {
-    const target = await this.targetsService.selectPort().toPromise();
-    console.log("🚀 ~ file: targets.component.ts:60 ~ TargetsComponent ~ testButton ~ target:", target)
+    // const target = await this.targetsService.selectPort().toPromise();
+    this.store.dispatch(new fromTargets.TargetEstablishConnection());
     const sameTarget = (await this.store.select(getTargets).toPromise())[0];
     console.log("🚀 ~ file: targets.component.ts:62 ~ TargetsComponent ~ testButton ~ sameTarget:", sameTarget)
     // this.targetsService.connect(target);
-    
+  }
+
+  testButton2() {
+    console.log("test button 2");
+    this.store.select(getTargets).subscribe(targets => {
+      console.log("🚀 ~ file: targets.component.ts:70 ~ TargetsComponent ~ testButton2 ~ t:", targets)
+      this.webSerialService.send(targets[0].connection, [IN_COMPUTER_ENABLE_BUMPERS]);
+    });
+    // this.targetsService.enableBumpers(t);
+    // this.store.dispatch(new fromTargets.TargetSendMessage({ message: { code: IN_COMPUTER_ENABLE_BUMPERS }, target: t }));
   }
 
   private updateSubscriptions(targets: Target[]) {
-    // if (!targets) {
-    //   this.targetSubscriptions.forEach(s => s.subscription.unsubscribe());
-    //   this.targetSubscriptions = [];
-    //   return;
-    // }
-    // for (let t of targets) {
-    //   let sub = this.targetSubscriptions.find(s => s.index === t.index);
-    //   if (!sub && t.claimed) {
-    //     let subscription = this.targetsService.readInboundMessages(t).subscribe(tim => {
-    //       console.log(tim);
-    //       this.store.dispatch(new fromTargets.TargetInboundMessageReceived({ targetIndex: t.index, message: tim }));
-    //     });
-    //     this.targetSubscriptions.push({ index: t.index, subscription: subscription, timeout: undefined });
-    //     this.onConnect(t);
-    //     this.refreshStateEverySecond(t);
-    //   } else if (sub && !t.claimed) {
-    //     sub.subscription.unsubscribe();
-    //     clearInterval(sub.timeout);
-    //     this.targetSubscriptions.splice(this.targetSubscriptions.indexOf(sub), 1);
-    //   }
-    // }
+    if (!targets) {
+      this.targetSubscriptions.forEach(s => s.subscription.unsubscribe());
+      this.targetSubscriptions = [];
+      return;
+    }
+    for (let t of targets) {
+      let sub = this.targetSubscriptions.find(s => s.index === t.index);
+      if (!sub && t.connection) {
+        let subscription = this.targetsService.readInboundMessages(t).pipe(distinctUntilKeyChanged('code')).subscribe(tim => {
+          console.log(tim);
+          this.store.dispatch(new fromTargets.TargetInboundMessageReceived({ target: t, message: tim }));
+        });
+        this.targetSubscriptions.push({ index: t.index, subscription: subscription, timeout: undefined });
+        this.onConnect(t);
+        this.refreshStateEverySecond(t);
+      } else if (sub && !t.connection) {
+        sub.subscription.unsubscribe();
+        clearInterval(sub.timeout);
+        this.targetSubscriptions.splice(this.targetSubscriptions.indexOf(sub), 1);
+      }
+    }
   }
 
   onConnect(target: Target) {
@@ -134,7 +144,7 @@ export class TargetsComponent implements OnInit, OnDestroy {
     this.targetSubscriptions[t.index].timeout = setInterval(() => this.store.dispatch(new fromTargets.TargetSendMessage({
       message: { code: IN_COMPUTER_GET_STATE },
       target: t
-    })), 1000);
+    })), 10000);
   }
 
   unclaimAll() {

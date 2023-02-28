@@ -13,12 +13,18 @@ export function targetsReducer(state = targetsInitialState, action: TargetsActio
       });
     }
 
-    // @ts-ignore
-    case TargetsActionTypes.TARGET_ESTABLISH_CONNECTION_SUCCESS: {
+    case TargetsActionTypes.TARGET_CONNECTION_SUCCESS: {
       return Object.assign({}, state, {
         loading: false,
+        targets: [...state.targets, action.payload.target]
       });
     }
+
+    // case TargetsActionTypes.TARGETS_REFRESH: {
+    //   return Object.assign({}, state, {
+    //     loading: true,
+    //   });
+    // }
 
     case TargetsActionTypes.TARGET_INBOUND_MESSAGE_RECEIVED: {
       let messageLog = [...state.messageLog];
@@ -26,6 +32,7 @@ export function targetsReducer(state = targetsInitialState, action: TargetsActio
         messageLog.shift();
       }
       messageLog.push(action.payload.message);
+      console.log("🚀 ~ file: targets.reducer.ts:35 ~ targetsReducer ~ message:", action.payload.message)
       let targets: Target[] = [];
       state.targets.forEach((s, i) => {
         if (action.payload.target.index === i && action.payload.message.state) {

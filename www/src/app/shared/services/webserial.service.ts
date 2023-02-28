@@ -1,6 +1,5 @@
 import { Injectable } from '@angular/core';
 import { from, Observable, of, Subject, throwError } from 'rxjs';
-import { catchError, switchMap } from 'rxjs/operators';
 
 const CARRIAGE_RETURN = 0x0D;
 const LINE_FEED = 0x0A;
@@ -31,39 +30,61 @@ export class WebSerialService {
       usbProductId: ARDUINO_PRODUCT_ID,
       usbVendorId: ARDUINO_VENDOR_ID
     };
-    const requestedPort = from(navigator.serial.requestPort({ filters: [filters] }));
-    const openedPort = requestedPort.pipe(
-      switchMap(port => {
-        port.open({ baudRate: 115200 });
-        return of(port);
+    const serialConnection = navigator.serial.requestPort({ filters: [filters] })
+      .then(async (port) => {
+        await port.open({ baudRate: 115200 });
+        console.log("🚀 ~ file: webserial.service.ts:36 ~ WebSerialService ~ requestPort ~ port:", port)
+        return port;
       })
-    );
-    const serialConnection = openedPort.pipe(
-      switchMap(port => {
+      .then(port => {
         const infos = port.getInfo();
         console.log("🚀 ~ file: webserial.service.ts:38 ~ WebSerialService ~ requestPort ~ infos:", infos)
 
+        const readSubject = this.createSerialPortReadSubject(port);
+        const writeSubject = this.createSerialPortWriteSubject(port);
         const connection: SerialConnection = {
           port,
-          readSubject: this.createSerialPortReadSubject(port),
-          writeSubject: this.createSerialPortWriteSubject(port),
+          readSubject: readSubject,
+          writeSubject: writeSubject,
           index: this.connectionCount++
         };
         this.connections.push(connection);
-        return of(connection);
-      }),
-      catchError(err => {
-        console.error("Error while connecting to port:", err);
-        return throwError(err);
-      })
-    );
-    return serialConnection;
+        return connection;
+      });
+    return from(serialConnection);
+    // const requestedPort = from(navigator.serial.requestPort({ filters: [filters] }));
+    // const openedPort = requestedPort.pipe(
+    //   switchMap(port => {
+    //     port.open({ baudRate: 115200 });
+    //     return of(port);
+    //   })
+    // );
+    // const serialConnection = openedPort.pipe(
+    //   switchMap(port => {
+    //     const infos = port.getInfo();
+    //     console.log("🚀 ~ file: webserial.service.ts:38 ~ WebSerialService ~ requestPort ~ infos:", infos)
+
+    //     const connection: SerialConnection = {
+    //       port,
+    //       readSubject: this.createSerialPortReadSubject(port),
+    //       writeSubject: this.createSerialPortWriteSubject(port),
+    //       index: this.connectionCount++
+    //     };
+    //     this.connections.push(connection);
+    //     return of(connection);
+    //   }),
+    //   catchError(err => {
+    //     console.error("Error while connecting to port:", err);
+    //     return throwError(err);
+    //   })
+    // );
+    // return serialConnection;
   }
 
   private createSerialPortReadSubject(port: SerialPort): Subject<Uint8Array> {
     const subject = new Subject<Uint8Array>();
 
-    if (!port || !port) {
+    if (!port || !port.readable) {
       throw new Error('Invalid or closed SerialPort.');
     }
 
@@ -71,12 +92,14 @@ export class WebSerialService {
 
     const read = async () => {
       const { value, done } = await reader.read();
+      console.log("🚀 ~ file: webserial.service.ts:95 ~ WebSerialService ~ read ~ value:", value)
       if (!done && value) {
         subject.next(value);
       }
     };
 
     subject.subscribe({
+      next: read,
       complete: () => {
         reader.cancel();
       },
@@ -98,6 +121,7 @@ export class WebSerialService {
     const writer = port.writable.getWriter();
 
     const write = async (data: Uint8Array) => {
+      console.log("🚀 ~ file: webserial.service.ts:124 ~ WebSerialService ~ write ~ data:", data)
       await writer.write(data);
     };
 
@@ -122,12 +146,8 @@ export class WebSerialService {
     }
   }
 
-  sendToDevice(index: number, message: number[]) {
-    const connection = this.connections[index];
-    if (!connection) {
-      console.error('No connection found for index', index);
-      return of(false);
-    }
+  send(connection: SerialConnection, message: number[]) {
+    console.log("🚀 ~ file: webserial.service.ts:153 ~ WebSerialService ~ sendToDevice ~ message:", message)
     connection.writeSubject.next(new Uint8Array([...message, CARRIAGE_RETURN, LINE_FEED]));
     return of(true);
   }
