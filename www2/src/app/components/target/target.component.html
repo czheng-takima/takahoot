@@ -1,0 +1,29 @@
+<mat-card class="example-card">
+    <mat-card-header>
+      <div mat-card-avatar class="example-header-image"></div>
+      <mat-card-title>{{playerName}}</mat-card-title>
+      <mat-card-subtitle>{{deviceId}}</mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-content>
+        <mat-grid-list cols="2" rowHeight="2:1">
+            <mat-grid-tile>
+                <button (click)="onAnswer(QuizResponse.Triangle)" mat-raised-button>△</button>
+            </mat-grid-tile>
+            <mat-grid-tile >
+                <button (click)="onAnswer(QuizResponse.Diamond)" mat-raised-button>◊</button>
+            </mat-grid-tile>
+            <mat-grid-tile>
+                <button (click)="onAnswer(QuizResponse.Circle)" mat-raised-button>○</button>
+            </mat-grid-tile>
+            <mat-grid-tile>
+                <button (click)="onAnswer(QuizResponse.Square)" mat-raised-button>□</button>
+            </mat-grid-tile>
+          </mat-grid-list>
+    </mat-card-content>
+    <mat-card-actions>
+        <button *ngIf="!isConnected" mat-button (click)="connect()">Connect</button>
+        <button *ngIf="isConnected" mat-button (click)="disconnect()">Disconnect</button>
+      <button mat-button>Reset</button>
+      <button mat-button (click)="joinGame()">Join Game</button>
+    </mat-card-actions>
+  </mat-card>

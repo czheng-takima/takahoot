@@ -1,0 +1,9 @@
+<mat-form-field class="example-form-field">
+    <mat-label>Clearable input</mat-label>
+    <input matInput type="text" [value]="gamePin">
+    <button *ngIf="!!gamePin" matSuffix mat-icon-button aria-label="Clear" (click)="gamePin=''">
+      <mat-icon>close</mat-icon>
+    </button>
+</mat-form-field>
+<app-target [gamePin]="gamePin" [playerName]="'player 1'"></app-target>
+<app-target [gamePin]="gamePin" [playerName]="'player 2'"></app-target>

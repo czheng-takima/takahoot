@@ -5,12 +5,14 @@ import {FormsModule} from '@angular/forms';
 import {TargetsListComponent} from './components/targets-list/targets-list.component';
 import {TargetComponent} from './components/target/target.component';
 import { BumperComponent } from './components/bumper/bumper.component';
+import { StoreComponent } from './components/store/store/store.component';
 
 @NgModule({
   declarations: [
     TargetsListComponent,
     TargetComponent,
-    BumperComponent
+    BumperComponent,
+    StoreComponent
   ],
   imports: [
     CommonModule,
@@ -21,7 +23,7 @@ import { BumperComponent } from './components/bumper/bumper.component';
     ButtonsModule,
     CardsModule
   ],
-  exports: [TargetsListComponent, TargetComponent, BumperComponent],
+  exports: [TargetsListComponent, TargetComponent, BumperComponent, StoreComponent],
   providers: [],
   entryComponents: [
 

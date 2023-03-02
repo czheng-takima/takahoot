@@ -2,7 +2,7 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { select, Store } from '@ngrx/store';
 import { MDBModalRef } from 'angular-bootstrap-md';
 import { Observable, Subscription } from 'rxjs';
-import { distinctUntilKeyChanged, map } from 'rxjs/operators';
+import { map } from 'rxjs/operators';
 import { WebSerialService } from 'src/app/shared/services/webserial.service';
 import { AppState } from '../../reducers/index';
 import {
@@ -83,7 +83,7 @@ export class TargetsComponent implements OnInit, OnDestroy {
     for (let t of targets) {
       let sub = this.targetSubscriptions.find(s => s.index === t.index);
       if (!sub && t.connection) {
-        let subscription = this.targetsService.readInboundMessages(t).pipe(distinctUntilKeyChanged('code')).subscribe(tim => {
+        let subscription = this.targetsService.readInboundMessages(t).subscribe(tim => {
           console.log(tim);
           this.store.dispatch(new fromTargets.TargetInboundMessageReceived({ target: t, message: tim }));
         });

@@ -1,0 +1,31 @@
+/* To learn more about this file see: https://angular.io/config/tsconfig. */
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "outDir": "./out-tsc/app",
+    "types": ["node", "w3c-web-serial"],
+    /* polyfills */
+    "paths" : {
+      "stream": ["./node_modules/stream-browserify"],
+      "http2": ["./node_modules/http2"],
+      "tls": ["./node_modules/tls"],
+      "assert": ["./node_modules/assert"],
+      "crypto": ["./node_modules/crypto-browserify"],
+      "http": ["./node_modules/stream-http"],
+      "https": ["./node_modules/https-browserify"],
+      "os": ["./node_modules/os-browserify"],
+      "url": ["./node_modules/url"],
+      "net": ["./node_modules/net"],
+      "zlib": ["./node_modules/zlib"],
+      "path": ["./node_modules/path"],
+    },
+  },
+  "files": [
+    "src/main.ts"
+  ],
+  "include": [
+    "src/**/*.d.ts",
+    "./decs.d.ts",
+    "src/polyfills.ts"
+  ]
+}

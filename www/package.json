@@ -27,6 +27,7 @@
     "@types/chart.js": "^2.9.15",
     "@types/md5": "^2.1.33",
     "@types/w3c-web-usb": "^1.0.4",
+    "@venixthedev/kahootjs": "^2.4.1",
     "angular-bootstrap-md": "^8.10.1",
     "chart.js": "^2.7.2",
     "core-js": "^3.6.4",
