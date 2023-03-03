@@ -23,8 +23,9 @@ export class KahootEngineService {
   }
 
   joinSession(sessionId: string, playerName: string): Observable<SessionState> {
-    return this.httpClient.put<SessionState>(this.url, {
-      ...httpOptions, params: {
+    console.log("Joining session " + sessionId + " as " + playerName)
+    return this.httpClient.post<SessionState>(this.url, {}, {
+      params: {
         sessionId: sessionId,
         playerName: playerName,
       }
@@ -33,7 +34,8 @@ export class KahootEngineService {
   }
 
   answerQuestion(sessionId: string, playerName: string, answer: string): Observable<SessionState> {
-    return this.httpClient.put<SessionState>(this.url, {
+    console.log("Answering question " + answer + " in session " + sessionId + " as " + playerName);
+    return this.httpClient.put<SessionState>(this.url, {}, {
       ...httpOptions, params: {
         sessionId: sessionId,
         playerName: playerName,

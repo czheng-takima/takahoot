@@ -101,14 +101,17 @@ export class TargetsService {
     return target.connection.readSubject.pipe(
       map(msg => {
         console.log("Message!");
+
         const code = msg[0] || -1;
+        console.log("---------------------------------------------------", code, JSON.stringify(msg));
         let state = undefined;
         switch (code) {
           case OUT_COMPUTER_CONNECTED:
           case OUT_COMPUTER_CALIBRATION_FINISHED:
           case OUT_COMPUTER_BUMPER_HIT:
           case OUT_COMPUTER_CONTROLLER_STATE:
-            state = readState(new DataView(msg));
+            state = readState(new DataView(msg.buffer)) as Bumper[];
+            console.log("bumper is hit: [", state[0].hit, state[1].hit, state[2].hit, state[3].hit, "]");
             break;
         }
         return {

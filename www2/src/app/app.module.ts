@@ -16,6 +16,7 @@ import { TargetsComponent } from './components/targets/targets.component';
 import { KahootEngineService } from './services/kahoot-engine.service';
 import { TargetsService } from './services/targets.service';
 import { WebSerialService } from './services/webserial.service';
+import { FormsModule } from '@angular/forms';
 
 
 const materialModules = [
@@ -38,7 +39,8 @@ const materialModules = [
     AppRoutingModule,
     BrowserAnimationsModule,
     ...materialModules,
-    HttpClientModule
+    HttpClientModule,
+    FormsModule,
   ],
   providers: [
     KahootEngineService,

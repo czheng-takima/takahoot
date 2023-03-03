@@ -1,9 +1,17 @@
-import { Controller, Delete, Get, Post, Put, Query } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Post,
+  Put,
+  Query,
+} from '@nestjs/common';
 import { KahootService, SessionState } from './kahoot.service';
 
 @Controller('kahoot')
 export class KahootController {
-  constructor(private kahootService: KahootService) { }
+  constructor(private kahootService: KahootService) {}
 
   @Post()
   joinGame(
