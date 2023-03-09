@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { from, Observable, of, Subject, throwError } from 'rxjs';
+import { from, Observable, of, ReplaySubject, Subject, throwError } from 'rxjs';
 import { SerialConnection } from '../models/serial-connection.model';
 
 const CARRIAGE_RETURN = 0x0D;
@@ -149,6 +149,62 @@ export class WebSerialService {
     console.log("🚀 ~ file: webserial.service.ts:153 ~ WebSerialService ~ sendToDevice ~ message:", message)
     connection.writeSubject.next(new Uint8Array([...message, CARRIAGE_RETURN, LINE_FEED]));
     return of(true);
+  }
+
+  getConnections(): SerialConnection[] {
+    return this.connections;
+  }
+
+  getMockConnections(): SerialConnection[] {
+    const mockConnection1: SerialConnection = {
+      port: {
+        getSignals: () => { return Promise.resolve({ dataCarrierDetect: true, clearToSend: true, ringIndicator: true, dataSetReady: true }); },
+        getInfo: () => { return { usbProductId: 0x8036, usbVendorId: 0x2341, usbManufacturerName: "Arduino (www.arduino.cc)", usbProductName: "Arduino Micro" } },
+        open: () => { return Promise.resolve() },
+        close: () => { return Promise.resolve() },
+        setSignals: () => { return Promise.resolve() },
+        readable: {
+          getReader: (): ReadableStreamDefaultReader => {
+            return {
+              read: () => {
+              },
+              releaseLock: () => { },
+              cancel: () => { },
+              closed: () => { }
+            } as any as ReadableStreamDefaultReader
+          }
+        } as ReadableStream,
+        writable: null
+      } as any as SerialPort,
+      readSubject: new ReplaySubject<Uint8Array>(),
+      writeSubject: new Subject<Uint8Array>(),
+      index: 1
+    };
+    const mockConnection2: SerialConnection = {
+      port: {
+        getSignals: () => { return Promise.resolve({ dataCarrierDetect: true, clearToSend: true, ringIndicator: true, dataSetReady: true }); },
+        getInfo: () => { return { usbProductId: 0x8037, usbVendorId: 0x2342, usbManufacturerName: "Arduino (www.arduino.cc)", usbProductName: "Arduino Micro 2" } },
+        open: () => { return Promise.resolve() },
+        close: () => { return Promise.resolve() },
+        setSignals: () => { return Promise.resolve() },
+        readable: {
+          getReader: (): ReadableStreamDefaultReader => {
+            return {
+              read: () => {
+              },
+              releaseLock: () => { },
+              cancel: () => { },
+              closed: () => { }
+            } as any as ReadableStreamDefaultReader
+          }
+        } as ReadableStream,
+        writable: null
+      } as any as SerialPort,
+      readSubject: new ReplaySubject<Uint8Array>(),
+      writeSubject: new Subject<Uint8Array>(),
+      index: 2
+    };
+    return [mockConnection1, mockConnection2];
   }
 
 }

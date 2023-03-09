@@ -6,5 +6,9 @@ import { Component } from '@angular/core';
   styleUrls: ['./game.component.scss']
 })
 export class GameComponent {
+  selectedTab = 0;
 
+  onTabChange(event: any) {
+    this.selectedTab = event.index;
+  }
 }

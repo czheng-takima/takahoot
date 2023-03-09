@@ -1,25 +1,38 @@
-.example-card {
-    max-width: 400px;
-  }
-  
-  .example-header-image {
-    background-color: red;
-    background-size: cover;
-  }
+:host {
+    .example-card {
+        max-width: 400px;
+    }
+
+    .example-header-image {
+        background-color: red;
+        background-size: cover;
+    }
+
+    mat-grid-tile {
+        button {
+            font-size: xx-large;
+        }
+    }
 
 
-.red {
-    background-color: red;
-}
+    .mat-red {
+        background: #E21B3C;
+        color: #fff;
 
-.blue {
-    background-color: blue;
-}
+    }
 
-.yellow {
-    background-color: yellow;
-}
+    .mat-blue {
+        background: #1368CE;
+        color: #fff;
+    }
 
-.green {
-    background-color: green;
+    .mat-yellow {
+        background: #D09F36;
+        color: #fff;
+    }
+
+    .mat-green {
+        background: #26890C;
+        color: #fff;
+    }
 }

@@ -1,9 +1,28 @@
-<mat-form-field class="example-form-field">
-    <mat-label>Clearable input</mat-label>
-    <input matInput type="text" [(ngModel)]="gamePin">
-    <button *ngIf="!!gamePin" matSuffix mat-icon-button aria-label="Clear" (click)="gamePin=''">
-      <mat-icon>close</mat-icon>
-    </button>
-</mat-form-field>
-<app-target [gamePin]="gamePin" [playerName]="'player 1'"></app-target>
-<app-target [gamePin]="gamePin" [playerName]="'player 2'"></app-target>
+<div fxLayout="row" style="height: 90vh;">
+  <div fxFlex="70" fxLayout="column" fxLayoutAlign="center center">
+    <mat-form-field class="example-form-field">
+      <mat-label>Game pin</mat-label>
+      <input matInput type="text" [(ngModel)]="gamePin" maxlength="7" style="text-align: center; letter-spacing: 10px;">
+      <button *ngIf="!!gamePin" matSuffix mat-icon-button aria-label="Clear" (click)="gamePin=''">
+        <mat-icon>close</mat-icon>
+      </button>
+    </mat-form-field>
+
+    <div fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="16px">
+      <app-target [gamePin]="gamePin" [playerName]="'player 1'"></app-target>
+      <app-target [gamePin]="gamePin" [playerName]="'player 2'"></app-target>
+      <app-target [gamePin]="gamePin" [playerName]="'player 3'"></app-target>
+    </div>
+  </div>
+
+  <div fxFlex="30" fxLayout="column" fxLayoutAlign="center center" style="margin: 160px;">
+    <mat-card fxFill style="height: calc(50% - 160px); margin: 1px; overflow-y: auto;">
+      <mat-card-header>
+        <mat-card-title>Log messages</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <app-log-messages></app-log-messages>
+      </mat-card-content>
+    </mat-card>
+  </div>
+</div>
