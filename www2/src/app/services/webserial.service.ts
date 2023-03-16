@@ -207,4 +207,9 @@ export class WebSerialService {
     return [mockConnection1, mockConnection2];
   }
 
+  getConnectionLabel(connection: SerialConnection) {
+    const { usbProductId, usbVendorId } = connection.port.getInfo();
+    return `Port ${connection.index} - ${usbProductId} ${usbVendorId}`;
+  }
+  
 }

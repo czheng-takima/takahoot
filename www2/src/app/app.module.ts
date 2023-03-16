@@ -3,9 +3,10 @@ import { BrowserModule } from '@angular/platform-browser';
 
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { FlexLayoutModule } from "@angular/flex-layout";
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatGridListModule } from '@angular/material/grid-list';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
@@ -22,10 +23,9 @@ import { SerialComponent } from './components/serial/serial.component';
 import { SettingsComponent } from './components/settings/settings.component';
 import { TargetComponent } from './components/target/target.component';
 import { TargetsComponent } from './components/targets/targets.component';
-import { KahootEngineService } from './services/kahoot-engine.service'; 
+import { KahootEngineService } from './services/kahoot-engine.service';
 import { TargetsService } from './services/targets.service';
 import { WebSerialService } from './services/webserial.service';
-
 
 const materialModules = [
   MatCardModule,
@@ -37,6 +37,7 @@ const materialModules = [
   MatTabsModule,
   MatToolbarModule,
   MatListModule,
+  MatCheckboxModule,
 ];
 
 @NgModule({
@@ -57,6 +58,7 @@ const materialModules = [
     HttpClientModule,
     FormsModule,
     FlexLayoutModule,
+    ReactiveFormsModule,
   ],
   providers: [
     KahootEngineService,

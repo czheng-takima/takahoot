@@ -24,7 +24,7 @@
   <mat-card-actions>
     <button *ngIf="!isConnected" mat-button (click)="connect()">Connect</button>
     <button *ngIf="isConnected" mat-button (click)="disconnect()">Disconnect</button>
-    <button mat-button>Reset</button>
+    <button mat-button (click)="reset()">Reset</button>
     <button mat-button (click)="joinGame()">Join Game</button>
   </mat-card-actions>
 </mat-card>

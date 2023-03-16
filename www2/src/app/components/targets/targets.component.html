@@ -1,5 +1,5 @@
-<div fxLayout="row" style="height: 90vh;">
-  <div fxFlex="70" fxLayout="column" fxLayoutAlign="center center">
+<div fxLayout.gt-sm="row" fxLayout.lt-sm="column" style="height: 90vh;">
+  <div fxFlex.lt-md="50" fxFlex.gt-md="70" fxLayout="column" fxLayoutAlign="center center">
     <mat-form-field class="example-form-field">
       <mat-label>Game pin</mat-label>
       <input matInput type="text" [(ngModel)]="gamePin" maxlength="7" style="text-align: center; letter-spacing: 10px;">
@@ -15,14 +15,14 @@
     </div>
   </div>
 
-  <div fxFlex="30" fxLayout="column" fxLayoutAlign="center center" style="margin: 160px;">
-    <mat-card fxFill style="height: calc(50% - 160px); margin: 1px; overflow-y: auto;">
+  <div fxFlex.gt-sm="30" fxFlex.lt-sm="100" fxLayout="column" fxLayoutAlign="center center" style="margin: 16px;">
+    <!-- <mat-card fxFill fxLayout="column" fxLayoutAlign="top" >
       <mat-card-header>
         <mat-card-title>Log messages</mat-card-title>
       </mat-card-header>
-      <mat-card-content>
+      <mat-card-content style="margin: 1px; overflow-y: auto;">
         <app-log-messages></app-log-messages>
       </mat-card-content>
-    </mat-card>
+    </mat-card> -->
   </div>
 </div>

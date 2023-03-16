@@ -6,6 +6,7 @@ import { IN_COMPUTER_DISABLE_BUMPERS_AND_BLINK, IN_COMPUTER_ENABLE_BUMPERS } fro
 import { Target } from 'src/app/models/target.model';
 import { KahootEngineService } from '../../services/kahoot-engine.service';
 import { TargetsService } from '../../services/targets.service';
+import { WebSerialService } from '../../services/webserial.service';
 
 enum QuizResponse {
   Triangle = 'red',
@@ -81,5 +82,9 @@ export class TargetComponent {
     this.kahootEngineService.waitForNewQuestion(this.gamePin, this.playerName).subscribe(() => {
       this.targetsService.sendMessage({ code: IN_COMPUTER_ENABLE_BUMPERS }, this.target!);
     });
+  }
+  
+  reset() {
+    this.targetsService.reset(this.target!);
   }
 }

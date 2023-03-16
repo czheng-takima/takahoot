@@ -1,1 +1,25 @@
-<p>settings works!</p>
+<form [formGroup]="form" fxLayout="column" fxLayoutAlign="space-evenly stretch" class="form-container">
+    <mat-form-field>
+        <mat-label>Select Connection Port</mat-label>
+        <mat-select formControlName="selectedConnection">
+            <mat-option [value]="connection" *ngFor="let connection of connections">{{toLabel(connection)}}</mat-option>
+        </mat-select>
+    </mat-form-field>
+
+    <mat-form-field>
+        <mat-label>Select Action Code</mat-label>
+        <mat-select formControlName="selectedTargetOutboundMessageCode">
+            <mat-option [value]="code.value" *ngFor="let code of targetOutboundMessageCodes">
+                {{code.displayName}}
+            </mat-option>
+        </mat-select>
+    </mat-form-field>
+
+    <mat-form-field>
+        <mat-label>Optional argument</mat-label>
+        <input matInput formControlName="args">
+        <mat-error *ngIf="!form.get('args')?.valid">Invalid hex string format</mat-error>
+    </mat-form-field>
+
+    <button mat-raised-button color="primary" [disabled]="!form.valid" (click)="onSend()">Send</button>
+</form>

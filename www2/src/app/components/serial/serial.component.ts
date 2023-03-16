@@ -17,8 +17,6 @@ export class SerialComponent implements OnInit {
     this.connections = this.webSerialService.getMockConnections();
   }
 
-  getConnectionLabel(connection: SerialConnection) {
-    const { usbProductId, usbVendorId } = connection.port.getInfo();
-    return `Port ${connection.index} - ${usbProductId} ${usbVendorId}`;
-  }
+  getConnectionLabel = this.webSerialService.getConnectionLabel;
+
 }
