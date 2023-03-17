@@ -1,25 +1,22 @@
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { Firestore, collection, collectionData } from '@angular/fire/firestore';
 import { Observable, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
-import { SessionState } from '../models/session-state.model';
+import { SessionState } from 'src/app/models/session-state.model';
+import { environment } from 'src/environments/environment.development';
 
 const httpOptions = {
-  headers: new HttpHeaders({
-    'Content-Type': 'application/json',
-    'Access-Control-Allow-Methods': 'GET, POST, PATCH, PUT, DELETE, OPTIONS',
-  }),
-  context: undefined,
-  withCredentials: undefined
 };
 
 @Injectable({
   providedIn: 'root'
 })
 export class KahootEngineService {
-  // url = 'http://localhost:3000/kahoot';
-  url = 'http://127.0.0.1:3000/kahoot';
-  constructor(private httpClient: HttpClient) {
+  url = environment.serverUrl;
+  connectionsState$: Observable<SessionState[]> = collectionData(collection(this.store, 'connections')) as Observable<SessionState[]>;
+  constructor(private httpClient: HttpClient, private store: Firestore) {
+    const collect = collection(store, 'connections');
   }
 
   joinSession(sessionId: string, playerName: string): Observable<SessionState> {

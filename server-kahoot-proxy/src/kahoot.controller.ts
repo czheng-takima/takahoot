@@ -1,13 +1,5 @@
-import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  Post,
-  Put,
-  Query,
-} from '@nestjs/common';
-import { KahootService, SessionState } from './kahoot.service';
+import { Controller, Delete, Post, Put, Query } from '@nestjs/common';
+import { KahootService } from './kahoot.service';
 
 @Controller('kahoot')
 export class KahootController {
@@ -36,13 +28,5 @@ export class KahootController {
     @Query('answer') answer: number,
   ) {
     return this.kahootService.answerQuestion(sessionId, playerName, answer);
-  }
-
-  @Get('/newQuestion')
-  async waitForNewQuestion(
-    @Query('sessionId') sessionId: string,
-    @Query('playerName') playerName: string,
-  ): Promise<SessionState> {
-    return this.kahootService.waitForNewQuestion(sessionId, playerName);
   }
 }

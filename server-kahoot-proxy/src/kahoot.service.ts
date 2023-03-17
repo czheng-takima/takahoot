@@ -3,129 +3,144 @@
 https://docs.nestjs.com/providers#services
 */
 
+import { Reference } from '@firebase/database-types';
 import { Injectable } from '@nestjs/common';
+import { FirebaseAdmin, InjectFirebaseAdmin } from './firebase';
 
 const Client = require('@venixthedev/kahootjs');
 
 export interface SessionState {
-  client: any;
-  sessionId: string;
-  playerName: string;
-  gameState: 'disconnected' | 'lobby' | 'quiz' | 'results' | string;
-  ongoingQuestion: boolean;
-  key: string;
+  sessionKey: string;
+  gameState: 'disconnected' | 'lobby' | 'quiz' | 'results';
+  ongoingQuestion: number;
 }
-
-const key = (sessionId: string, playerName: string) =>
-  sessionId + ' ' + playerName;
 
 @Injectable()
 export class KahootService {
   Client = Client;
-  sessions: Map<string, SessionState> = new Map();
 
-  getKahoot() {
-    return Client;
+  kahootClients: Map<string, typeof Client> = new Map();
+  dbReference: Reference;
+  constructor(@InjectFirebaseAdmin() private readonly firebase: FirebaseAdmin) {
+    const database = firebase.database;
+    this.dbReference = database.ref(`/sessions`);
   }
 
-  async joinSession(
-    sessionId: string,
-    playerName: string,
-  ): Promise<SessionState> {
+  async joinSession(sessionId: string, playerName: string): Promise<void> {
     const client = new Client();
     console.log('Joining session: ' + sessionId + ' as ' + playerName);
-    await client.join(sessionId, playerName);
-    const k = key(sessionId, playerName);
-
-    client.on('Joined', () => {
-      console.log('Joined session: ' + sessionId + ' as ' + playerName);
-      this.sessions.get(key(sessionId, playerName)).gameState = 'lobby';
-    });
-    client.on('QuizStart', () => {
-      console.log('The quiz has started for ' + k);
-      this.sessions.get(key(sessionId, playerName)).gameState = 'quiz';
-    });
-    client.on('QuestionStart', (question: any) => {
-      console.log(
-        `A new question has started for ${k} question: ${JSON.stringify(
-          question,
-        )}`,
+    await client.join(sessionId, playerName).catch((err: Error) => {
+      console.error(
+        `Unable to join session, session ID [${sessionId}] or player name [${playerName}] invalid: `,
+        err,
       );
-      this.sessions.get(key(sessionId, playerName)).ongoingQuestion = true;
+      return Promise.reject();
     });
-    client.on('QuizEnd', () => {
-      console.log('The quiz has ended for ' + k);
-      this.sessions.get(key(sessionId, playerName)).gameState = 'results';
-    });
-
-    const v = {
-      client: client,
-      sessionId: sessionId,
-      playerName: playerName,
+    const sessionKey = this.keyOf(sessionId, playerName);
+    this.setCallbacks(sessionKey, client);
+    this.kahootClients.set(sessionKey, client);
+    this.dbReference.child(sessionKey).set({
+      sessionKey,
       gameState: 'lobby',
-      ongoingQuestion: false,
-      key: k,
-    };
-    this.sessions.set(k, v);
-    return Promise.resolve(v);
+      ongoingQuestion: 0,
+    });
+    return Promise.resolve();
   }
 
   async answerQuestion(
     sessionId: string,
     playerName: string,
     answer: number,
-  ): Promise<SessionState> {
-    const k = key(sessionId, playerName);
-    const session = this.sessions.get(k);
-    if (!session) {
-      console.log('No session to answer question for ' + k);
-      return Promise.resolve(session);
+  ): Promise<void> {
+    const sessionKey = this.keyOf(sessionId, playerName);
+    const client = this.kahootClients.get(sessionKey);
+    const sessionState = await this.getSessionState(sessionKey);
+    if (!this.isPlayableSession(sessionState)) {
+      console.error('Session not playable: ' + sessionKey);
+      return Promise.reject();
     }
-    if (!session.ongoingQuestion) {
-      console.log('No question to answer for ' + k);
-      return Promise.resolve(session);
-    }
-    console.log('Answering question: ' + answer + ' for ' + k);
-    session.client.answer(answer);
-    session.ongoingQuestion = false;
-    return Promise.resolve(session);
+    console.log('Answering question: ' + answer + ' for ' + sessionKey);
+    client.answer(answer);
+    return Promise.resolve();
   }
 
   async disconnect(sessionId: string, playerName: string) {
-    const k = key(sessionId, playerName);
-    const session = this.sessions.get(k);
-    if (!session) {
-      console.log('No session to disconnect for ' + k);
+    const sessionKey = this.keyOf(sessionId, playerName);
+    const client = this.kahootClients.get(sessionKey);
+    if (!client) {
+      console.log('No session to disconnect for ' + sessionKey);
+      return;
     }
-    console.log('Disconnecting ' + k);
-    session.client.leave();
-    this.sessions.delete(k);
+    console.log('Disconnecting ' + sessionKey);
+    client.leave();
+    this.kahootClients.delete(sessionKey);
+    await this.dbReference.child(sessionKey).remove();
   }
 
-  async waitForNewQuestion(sessionId: string, playerName: string) {
-    const k = key(sessionId, playerName);
-    const session = this.sessions.get(k);
-    if (!session) {
-      console.log('No session to wait for new question for ' + k);
-      return Promise.resolve(session);
-    }
+  private keyOf(sessionId: string, playerName: string) {
+    return sessionId + ' ' + playerName;
+  }
 
-    // Create a new Promise that resolves when the "QuestionStart" event is emitted
-    const questionStartPromise = new Promise((resolve) => {
-      session.client.on('QuestionStart', () => {
-        console.log('Question started for ' + k);
-        resolve(session);
-      });
-      session.client.on('QuizEnd', () => {
-        console.log('Quiz ended for ' + k);
-        resolve(session);
+  private async updateSession(
+    sessionKey: string,
+    changes: Partial<SessionState>,
+  ) {
+    return this.dbReference.child(sessionKey).update(changes);
+  }
+
+  private setCallbacks(sessionKey: string, client: typeof Client) {
+    client.on('Joined', async () => {
+      console.log('Joined session: ' + sessionKey);
+      await this.updateSession(sessionKey, { gameState: 'lobby' });
+    });
+    client.on('QuizStart', async () => {
+      console.log('Quiz started: ' + sessionKey);
+      await this.updateSession(sessionKey, { gameState: 'quiz' });
+    });
+    client.on('QuestionStart', async (question: any) => {
+      console.log('Question started: ' + sessionKey, question);
+      await this.updateSession(sessionKey, {
+        ongoingQuestion: question.index,
       });
     });
+    client.on('QuestionEnd', async () => {
+      console.log('Question ended: ' + sessionKey);
+      await this.updateSession(sessionKey, { ongoingQuestion: -1 });
+    });
+    client.on('QuizEnd', async () => {
+      console.log('Quiz ended: ' + sessionKey);
+      await this.updateSession(sessionKey, { gameState: 'results' });
+    });
+    client.on('Disconnect', async () => {
+      console.log('Disconnected: ' + sessionKey);
+      await this.updateSession(sessionKey, { gameState: 'disconnected' });
+      return this.kahootClients.delete(sessionKey) /* && client.leave() */;
+    });
+    return client;
+  }
 
-    // Wait for the "QuestionStart" event to be emitted before returning the session
-    await questionStartPromise;
+  private async getSessionState(sessionKey: string): Promise<SessionState> {
+    return this.dbReference
+      .child(sessionKey)
+      .get()
+      .then((snapshot) => {
+        const sessionState = snapshot.val();
+        if (!sessionState) {
+          throw new Error('Session not found: ' + sessionKey);
+        }
+        return sessionState;
+      });
+  }
 
-    console.log('New question ongoing for ' + k);
-    return Promise.resolve(session);
+  private isPlayableSession(sessionState?: SessionState) {
+    if (!sessionState) {
+      console.error();
+      return false;
+    }
+    if (!sessionState.ongoingQuestion || sessionState.ongoingQuestion < 0) {
+      console.error();
+      return false;
+    }
+    return sessionState.gameState === 'quiz';
   }
 }
