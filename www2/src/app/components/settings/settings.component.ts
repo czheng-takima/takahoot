@@ -32,7 +32,7 @@ export class SettingsComponent implements OnInit {
     this.form = new FormGroup({
       selectedConnection: new FormControl(null, Validators.required),
       selectedTargetOutboundMessageCode: new FormControl(null, Validators.required),
-      args: new FormControl(0x00, [Validators.pattern(/^0x[0-9a-fA-F]{2}$/)]),
+      args: new FormControl(0x00, [Validators.pattern(/^$|^0x[0-9a-fA-F]{2}( +0x[0-9a-fA-F]{2}){0,2}$/)]),
     });
   }
 
