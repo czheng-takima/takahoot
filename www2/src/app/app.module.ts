@@ -23,9 +23,7 @@ import { environment } from '../environments/environment';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { GameComponent } from './components/game/game.component';
-import { LogMessagesComponent } from './components/log-messages/log-messages.component';
 import { SerialPortsComponent } from './components/serial-ports/serial-ports.component';
-import { SerialComponent } from './components/serial/serial.component';
 import { SettingsComponent } from './components/settings/settings.component';
 import { TargetComponent } from './components/target/target.component';
 import { TargetsComponent } from './components/targets/targets.component';
@@ -53,9 +51,7 @@ const materialModules = [
     TargetComponent,
     TargetsComponent,
     GameComponent,
-    SerialComponent,
     SettingsComponent,
-    LogMessagesComponent,
     SerialPortsComponent,
   ],
   imports: [

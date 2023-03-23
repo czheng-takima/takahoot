@@ -2,14 +2,17 @@
     <mat-tab label="Game">
         <ng-template mat-tab-label>
             <mat-icon>games</mat-icon>
-            Game
+             Game
         </ng-template>
-        <app-targets></app-targets>
+        <div style="width: 100%;">
+            <app-serial-ports></app-serial-ports>
+            <app-targets></app-targets>
+        </div>
     </mat-tab>
     <mat-tab label="Settings">
         <ng-template mat-tab-label>
             <mat-icon>settings</mat-icon>
-            Settings
+             Settings
         </ng-template>
         <app-settings></app-settings>
     </mat-tab>

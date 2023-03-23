@@ -1,10 +1,10 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Firestore, collection, collectionData } from '@angular/fire/firestore';
 import { Observable, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { SessionState } from 'src/app/models/session-state.model';
 import { environment } from 'src/environments/environment.development';
+import { FirebaseService } from './firebase.service';
 
 const httpOptions = {
 };
@@ -14,9 +14,7 @@ const httpOptions = {
 })
 export class KahootEngineService {
   url = environment.serverUrl;
-  connectionsState$: Observable<SessionState[]> = collectionData(collection(this.store, 'connections')) as Observable<SessionState[]>;
-  constructor(private httpClient: HttpClient, private store: Firestore) {
-    const collect = collection(store, 'connections');
+  constructor(private httpClient: HttpClient) {
   }
 
   joinSession(sessionId: string, playerName: string): Observable<SessionState> {
@@ -49,15 +47,6 @@ export class KahootEngineService {
         playerName: playerName,
       }
     }).pipe(catchError(this.handleError<SessionState>('leaveSession')));
-  }
-
-  waitForNewQuestion(sessionId: string, playerName: string): Observable<SessionState> {
-    return this.httpClient.get<SessionState>(`${this.url}/newQuestion`, {
-      ...httpOptions, params: {
-        sessionId: sessionId,
-        playerName: playerName,
-      }
-    }).pipe(catchError(this.handleError<SessionState>('waitForNewQuestion')));
   }
 
   private handleError<T>(operation = 'operation', result?: T) {

@@ -1,9 +1,0 @@
-<mat-form-field appearance="fill">
-    <mat-label>Select a device</mat-label>
-    <mat-select [(value)]="selectedPort">
-      <mat-option>None</mat-option>
-      <mat-option *ngFor="let conn of connections" value="{{conn.index}}">{{ getConnectionLabel(conn) }}</mat-option>
-    </mat-select>
-  </mat-form-field>
-  
-  <p>You selected: {{selectedPort}}</p>

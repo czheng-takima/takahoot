@@ -1,8 +1,7 @@
 <mat-card class="example-card">
   <mat-card-header>
-    <div mat-card-avatar class="example-header-image"></div>
     <mat-card-title>{{playerName}}</mat-card-title>
-    <mat-card-subtitle>{{deviceId}}</mat-card-subtitle>
+    <mat-card-subtitle>{{getDetails()}}</mat-card-subtitle>
   </mat-card-header>
   <mat-card-content>
     <mat-grid-list fxLayoutGap="16px" cols="2" rowHeight="1:1">
@@ -22,7 +21,7 @@
     </mat-grid-list>
   </mat-card-content>
   <mat-card-actions>
-    <button *ngIf="!isConnected" mat-button (click)="connect()">Connect</button>
+    <!-- <button *ngIf="!isConnected" mat-button (click)="connect()">Connect</button> -->
     <button *ngIf="isConnected" mat-button (click)="disconnect()">Disconnect</button>
     <button mat-button (click)="reset()">Reset</button>
     <button mat-button (click)="joinGame()">Join Game</button>

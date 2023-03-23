@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Observable, of } from 'rxjs';
+import { BehaviorSubject, Observable, of } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { Bumper } from '../models/bumper.model';
 import { SerialConnection } from '../models/serial-connection.model';
@@ -49,6 +49,31 @@ function readState(data: DataView | undefined): Bumper[] | undefined {
   providedIn: 'root'
 })
 export class TargetsService {
+
+  targets$: BehaviorSubject<Target>[] = [
+    new BehaviorSubject<Target>({
+      index: 1,
+      name: 'Target 1',
+      connection: null as any as SerialConnection,
+      state: []
+    }),
+    new BehaviorSubject<Target>({
+      index: 2,
+      name: 'Target 2',
+      connection: null as any as SerialConnection,
+      state: []
+    }),
+    new BehaviorSubject<Target>({
+      index: 3,
+      name: 'Target 3',
+      connection: null as any as SerialConnection,
+      state: []
+    })
+  ];
+
+  getTargets(): BehaviorSubject<Target>[] {
+    return this.targets$;
+  }
 
   constructor(private webSerialService: WebSerialService) {
   }
@@ -123,11 +148,11 @@ export class TargetsService {
   }
 
 
-  selectPort(): Observable<Target> {
-    return this.webSerialService
-      .requestPort()
-      .pipe(map(serialConnectionToTarget));
-  }
+  // selectPort(): Observable<Target> {
+  //   return this.webSerialService
+  //     .requestPort()
+  //     .pipe(map(serialConnectionToTarget));
+  // }
 
   sendMessage(message: TargetOutboundMessage, target: Target): Observable<boolean> {
     console.log("🚀 ~ file: targets.service.ts:129 ~ TargetsService ~ sendMessage ~ message:", message)

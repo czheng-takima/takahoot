@@ -3,6 +3,7 @@ import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { SerialConnection } from 'src/app/models/serial-connection.model';
 import { WebSerialService } from 'src/app/services/webserial.service';
 
+import { Observable } from 'rxjs';
 import { TargetOutboundMessageCode } from 'src/app/models/target-outbound-message.model';
 @Component({
   selector: 'app-settings',
@@ -12,7 +13,7 @@ import { TargetOutboundMessageCode } from 'src/app/models/target-outbound-messag
 export class SettingsComponent implements OnInit {
   form!: FormGroup;
 
-  connections: SerialConnection[] = [];
+  connections: Observable<SerialConnection[]> = this.webSerialService.getMockConnections();
   selectedConnection: SerialConnection | undefined;
 
   targetOutboundMessageCodes = Object.entries(TargetOutboundMessageCode)
@@ -28,10 +29,10 @@ export class SettingsComponent implements OnInit {
   constructor(private webSerialService: WebSerialService) { }
 
   ngOnInit(): void {
-    this.connections = this.webSerialService.getConnections();
     this.form = new FormGroup({
       selectedConnection: new FormControl(null, Validators.required),
       selectedTargetOutboundMessageCode: new FormControl(null, Validators.required),
+      // either empty, or 0x00, or 0x00 0x00, or 0x00 0x00 0x00 allowed
       args: new FormControl(0x00, [Validators.pattern(/^$|^0x[0-9a-fA-F]{2}( +0x[0-9a-fA-F]{2}){0,2}$/)]),
     });
   }
@@ -41,10 +42,6 @@ export class SettingsComponent implements OnInit {
     console.log("🚀 ~ file: settings.component.ts:39 ~ SettingsComponent ~ onSend ~  selectedConnection, selectedTargetOutboundMessageCode, args:", selectedConnection, selectedTargetOutboundMessageCode, args)
 
     this.webSerialService.send(selectedConnection, [selectedTargetOutboundMessageCode, args]);
-  }
-
-  update(): void {
-    this.connections = this.webSerialService.getConnections();
   }
 
   toLabel(connection: SerialConnection): string {

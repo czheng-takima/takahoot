@@ -9,9 +9,9 @@
     </mat-form-field>
 
     <div fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="16px">
-      <app-target [gamePin]="gamePin" [playerName]="'player 1'"></app-target>
-      <app-target [gamePin]="gamePin" [playerName]="'player 2'"></app-target>
-      <app-target [gamePin]="gamePin" [playerName]="'player 3'"></app-target>
+      <app-target [gamePin]="gamePin" [target$]="targets$[0]"></app-target>
+      <app-target [gamePin]="gamePin" [target$]="targets$[1]"></app-target>
+      <app-target [gamePin]="gamePin" [target$]="targets$[2]"></app-target>
     </div>
   </div>
 
