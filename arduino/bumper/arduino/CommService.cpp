@@ -93,9 +93,11 @@ Msg CommService::processControllerConnected() {
   return computeMsg(2, gameController->getState());
 }
 
+void(* resetFunc) (void) = 0; //declare reset function @ address 0
 
 Msg CommService::processControllerReset() {
-  asm volatile ("  jmp 0"); 
+  // asm volatile ("  jmp 0"); 
+  resetFunc();
   return computeMsg(0, NULL);
 }
 
