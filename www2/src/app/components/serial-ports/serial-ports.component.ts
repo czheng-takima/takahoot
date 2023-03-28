@@ -1,15 +1,14 @@
 import { Component, OnInit } from '@angular/core';
-import { BehaviorSubject, combineLatest } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { BehaviorSubject } from 'rxjs';
 import { SerialConnection } from 'src/app/models/serial-connection.model';
 import { Target } from 'src/app/models/target.model';
 import { WebSerialService } from 'src/app/services/webserial.service';
 import { TargetsService } from '../../services/targets.service';
 
-interface SerialBinding {
-  connection: SerialConnection;
-  target: Target;
-}
+// interface SerialBinding {
+//   connection: SerialConnection;
+//   target: Target;
+// }
 
 @Component({
   selector: 'app-serial-ports',
@@ -18,13 +17,28 @@ interface SerialBinding {
 })
 export class SerialPortsComponent implements OnInit {
   displayedColumns: string[] = ['index', 'port', 'target', 'actions'];
-  dataSource: { index: number; port: string; target: string; actions: string; }[] = [];
+  dataSource: { index: number; port: string; target: Target; actions: string; }[] = [];
   openedConnections$: BehaviorSubject<SerialConnection[]> = this.webSerialService.getConnections();
-  serialBindings$: BehaviorSubject<SerialBinding[]> = new BehaviorSubject<SerialBinding[]>([]);
+  // serialBindings$: BehaviorSubject<SerialBinding[]> = new BehaviorSubject<SerialBinding[]>([]);
   targets$: BehaviorSubject<Target>[] = this.targetService.getTargets();
   targets: Target[] = [];
+  selectedTargets: { [key: number]: Target } = {};
 
   constructor(private webSerialService: WebSerialService, private targetService: TargetsService) {
+  }
+
+  onTargetSelected(port: { index: number; port: string; target: Target; actions: string; }, selectedTarget: Target) {
+
+    // Update the selectedTargets object with the selected target for the current row
+    this.selectedTargets[port.index] = selectedTarget;
+
+    const connections = this.openedConnections$.getValue();
+    selectedTarget.connection = connections[port.index];
+  }
+
+  getSelectedTarget(index: number): Target {
+    // Return the selected target for the given row index, or null if none is selected
+    return this.selectedTargets[index] || null;
   }
 
   ngOnInit() {
@@ -41,36 +55,20 @@ export class SerialPortsComponent implements OnInit {
       });
     });
 
-    // Make sure the datasource used to display the table is updated when the serial bindings change
-    combineLatest([this.openedConnections$, this.targets$])
-      .pipe(
-        map(([connections, target$]) => {
-
-          return connections.map((connection: SerialConnection, index) => {
-            return {
-              // default binding
-              connection: connection,
-              target: this.targets$[index].getValue(),
-            };
-          });
-        })
-      )
-      .subscribe((serialBindings: SerialBinding[]) => {
-        this.serialBindings$.next(serialBindings);
-        this.serialBindings$.subscribe(
-          (serialBindings: SerialBinding[]) => {
-            this.dataSource = serialBindings.map((binding: SerialBinding) => {
-              const portLabel: string = this.webSerialService.getConnectionLabel(binding.connection);
-              return {
-                index: binding.connection.index,
-                port: portLabel,
-                target: '',
-                actions: '',
-              };
-            });
-          }
-        );
+    // Subscribe to the openedConnections$ observable
+    this.openedConnections$.subscribe((connections: SerialConnection[]) => {
+      // Update the dataSource array with the new connections
+      this.dataSource = connections.map((connection, index) => {
+        const target = this.selectedTargets[index] || this.targets[index] || null;
+        const portLabel: string = this.webSerialService.getConnectionLabel(connection);
+        return {
+          index: index,
+          port: portLabel,
+          target: target,
+          actions: '',
+        };
       });
+    });
   }
 
   addPort() {
