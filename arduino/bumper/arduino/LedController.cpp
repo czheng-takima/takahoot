@@ -81,10 +81,10 @@ void LedController::tickBlink() {
     leds[i] = ColorFromPalette(palette, 0, BRIGHTNESS, blending);
   }
   FastLED.show();
-  #ifdef DEBUG_MODE
+/*   #ifdef DEBUG_MODE
     Serial.print("Leds are Blinking ");
     Serial.println(lastBlinkValue ? "ON" : "OFF");
-  #endif
+  #endif */
 }
 
 

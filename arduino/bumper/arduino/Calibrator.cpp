@@ -33,8 +33,11 @@ void Calibrator::tick() {
     Serial.print(trigger->threshold);
     Serial.print(" now is ");
     Serial.println(maxThreshold);
+    Serial.print(" actual is ");
+    Serial.println(maxThreshold * 1.2);
+
     #endif
-    trigger->threshold = maxThreshold;
+    trigger->threshold = maxThreshold*1.2;
     ++loops;
     return;
   }
