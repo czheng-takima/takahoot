@@ -46,7 +46,7 @@ ISR (SPI_STC_vect) {
     sendBuffer = res.data;
     total = res.size;
     sent = 0;
-    #ifdef DEBUG_MODE
+    /* #ifdef DEBUG_MODE
     Serial.print("Sending ");
     Serial.print(total);
     Serial.print(" bytes: ");
@@ -55,7 +55,7 @@ ISR (SPI_STC_vect) {
       Serial.print("  ");
     }
     Serial.println("");
-    #endif
+    #endif */
   }
   if (total - sent > 0) {
     SPDR = sendBuffer[sent];

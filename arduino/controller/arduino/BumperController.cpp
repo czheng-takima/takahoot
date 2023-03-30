@@ -30,10 +30,10 @@ void BumperController::tick() {
   }
   this->refreshStates();
   #ifdef DEBUG_MODE
-  if (millis() - lastMillis > 1000) {
+  /* if (millis() - lastMillis > 1000) {
     lastMillis = millis();
     boardStateHandler->prettyPrint();
-  }
+  } */
   #endif
   if (this->boardStateHandler->hasHitChanged() && this->boardStateHandler->isHit()) {
     confirmHit();

@@ -6,6 +6,8 @@
 SerialClient::SerialClient() {
 }
 
+void(* resetFunc) (void) = 0;
+
 void SerialClient::init(BumperController* ctrl) {
 
   while (!WebUSBSerial) {
@@ -184,6 +186,15 @@ void SerialClient::processCommand() {
       #ifdef DEBUG_MODE
       Serial.println("Done");
       #endif
+      break; 
+    case IN_COMPUTER_RESET:
+      #ifdef DEBUG_MODE
+      Serial.println("Received command IN_COMPUTER_RESET");
+      #endif
+      ctrl->resetBumpers();
+      #ifdef DEBUG_MODE
+      Serial.println("Done");
+      #endif
       break;
     case IN_COMPUTER_GET_STATE:
       #ifdef DEBUG_MODE
@@ -196,15 +207,10 @@ void SerialClient::processCommand() {
       Serial.println("Done");
       #endif
       break;
-    case IN_COMPUTER_RESET:
-      #ifdef DEBUG_MODE
-      Serial.println("Received command IN_COMPUTER_RESET");
-      #endif
-      ctrl->resetBumpers();
-      asm volatile ("  jmp 0");
-      #ifdef DEBUG_MODE
-      Serial.println("Done");
-      #endif
-      break;
   }
+
+  buffer[0] = 0;
+  buffer[1] = 0;
+  buffer[2] = 0;
+  buffer[3] = 0;
 }
