@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable, of } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { BehaviorSubject, Observable, lastValueFrom, of } from 'rxjs';
+import { distinctUntilChanged, map, pairwise } from 'rxjs/operators';
+import { QuizResponse } from '../components/target/target.component';
 import { Bumper } from '../models/bumper.model';
 import { SerialConnection } from '../models/serial-connection.model';
 import {
@@ -71,12 +72,56 @@ export class TargetsService {
     })
   ];
 
+  getTargetSubject(target: Target) {
+    return this.targets$.find(target$ => target$.getValue() === target);
+  }
+
   getTargets(): BehaviorSubject<Target>[] {
     return this.targets$;
   }
 
   constructor(private webSerialService: WebSerialService) {
   }
+
+  setConnection(target$: BehaviorSubject<Target>, connection: SerialConnection): void {
+    const updatedTarget = { ...target$.getValue(), connection };
+    target$.next(updatedTarget);
+  }
+
+  async initializeTarget(target: Target, onAnswer: (response: QuizResponse) => void) {
+    await lastValueFrom(this.connect(target));
+    await lastValueFrom(this.startCalibration(target, 0));
+    await lastValueFrom(this.startCalibration(target, 1));
+    await lastValueFrom(this.startCalibration(target, 2));
+    await lastValueFrom(this.startCalibration(target, 3));
+    await lastValueFrom(this.changeTolerance(target, 0, 0x82));
+    await lastValueFrom(this.changeTolerance(target, 1, 0x82));
+    await lastValueFrom(this.changeTolerance(target, 2, 0x82));
+    await lastValueFrom(this.changeTolerance(target, 3, 0x82));
+    this.readInboundMessages(target)
+      .pipe(
+        distinctUntilChanged(),
+        pairwise()
+      )
+      .subscribe(([prev, message]: TargetInboundMessage[]) => {
+        const keys = Object.keys(message);
+        // @ts-ignore
+        const changes = keys.filter(key => prev[key] !== message[key]);
+        console.log('Changed properties:');
+        changes.forEach(key => {
+          // @ts-ignore
+          console.log(`${key}: ${message[key]}`);
+        });
+
+        console.log('code: ' + message.code + ' state: [ ' + JSON.stringify(message.state) + ' ]');
+        if (message.code === OUT_COMPUTER_BUMPER_HIT) {
+          // index is the index of the element that has the attribute hit equals to true inside the array message.state
+          const index = message.state?.findIndex((bumper) => bumper.hit === true) ?? -1;
+          onAnswer(Object.values(QuizResponse)[index] as QuizResponse);
+        }
+      });
+  }
+
 
   connect(target: Target): Observable<boolean> {
     return this.webSerialService.send(target.connection, [IN_COMPUTER_CONNECTED]);
@@ -125,10 +170,8 @@ export class TargetsService {
     }
     return target.connection.readSubject.pipe(
       map(msg => {
-        console.log("Message!");
 
         const code = msg[0] || -1;
-        console.log("---------------------------------------------------", code, JSON.stringify(msg));
         let state = undefined;
         switch (code) {
           case OUT_COMPUTER_CONNECTED:

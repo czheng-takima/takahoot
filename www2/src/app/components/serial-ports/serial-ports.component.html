@@ -15,11 +15,11 @@
 
     <ng-container matColumnDef="target">
         <th mat-header-cell *matHeaderCellDef>Target</th>
-        <td mat-cell *matCellDef="let port">
+        <td mat-cell *matCellDef="let data">
             <mat-form-field>
-                <mat-select [(ngModel)]="port.target" (selectionChange)="onTargetSelected(port, $event.value)">
-                    <mat-option *ngFor="let target of targets" [value]="target">
-                        {{ target.name }}
+                <mat-select [(ngModel)]="data.target$" (selectionChange)="onTargetSelected(data, $event.value)">
+                    <mat-option *ngFor="let target$ of targets$" [value]="target$">
+                        {{ (target$ | async)?.name || 'No name' }}
                     </mat-option>
                 </mat-select>
             </mat-form-field>
@@ -29,7 +29,7 @@
     <ng-container matColumnDef="actions">
         <th mat-header-cell *matHeaderCellDef> Actions </th>
         <td mat-cell *matCellDef="let element">
-            <button mat-button>Edit</button>
+            <button mat-button (click)="test">Edit</button>
             <button mat-button>Edit</button>
 
         </td>

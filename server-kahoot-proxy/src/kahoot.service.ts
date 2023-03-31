@@ -13,6 +13,7 @@ export interface SessionState {
   sessionKey: string;
   gameState: 'disconnected' | 'lobby' | 'quiz' | 'results';
   ongoingQuestion: number;
+  acceptingAnswers: boolean;
 }
 
 @Injectable()
@@ -42,8 +43,9 @@ export class KahootService {
     this.dbReference.child(sessionKey).set({
       sessionKey,
       gameState: 'lobby',
-      ongoingQuestion: 0,
-    });
+      ongoingQuestion: -2,
+      acceptingAnswers: false,
+    } as SessionState);
     return Promise.resolve();
   }
 
@@ -57,6 +59,10 @@ export class KahootService {
     const sessionState = await this.getSessionState(sessionKey);
     if (!this.isPlayableSession(sessionState)) {
       console.error('Session not playable: ' + sessionKey);
+      return Promise.reject();
+    }
+    if (sessionState.acceptingAnswers) {
+      console.error('Session not accepting answers: ' + sessionKey);
       return Promise.reject();
     }
     console.log('Answering question: ' + answer + ' for ' + sessionKey);
@@ -101,15 +107,20 @@ export class KahootService {
       console.log('Question started: ' + sessionKey, question);
       await this.updateSession(sessionKey, {
         ongoingQuestion: question.index,
+        acceptingAnswers: true,
       });
     });
     client.on('QuestionEnd', async () => {
       console.log('Question ended: ' + sessionKey);
-      await this.updateSession(sessionKey, { ongoingQuestion: -1 });
+      // await this.updateSession(sessionKey, { ongoingQuestion: -1 });
+      await this.updateSession(sessionKey, { acceptingAnswers: false });
     });
     client.on('QuizEnd', async () => {
       console.log('Quiz ended: ' + sessionKey);
-      await this.updateSession(sessionKey, { gameState: 'results' });
+      await this.updateSession(sessionKey, {
+        gameState: 'results',
+        acceptingAnswers: false,
+      });
     });
     client.on('Disconnect', async () => {
       console.log('Disconnected: ' + sessionKey);
@@ -137,7 +148,7 @@ export class KahootService {
       console.error();
       return false;
     }
-    if (!sessionState.ongoingQuestion || sessionState.ongoingQuestion < 0) {
+    if (sessionState.ongoingQuestion < 0) {
       console.error();
       return false;
     }

@@ -94,7 +94,6 @@ export class WebSerialService {
 
     const read = async () => {
       const { value, done } = await reader.read();
-      console.log("🚀 ~ file: webserial.service.ts:95 ~ WebSerialService ~ read ~ value:", value)
       if (!done && value) {
         subject.next(value);
       }
