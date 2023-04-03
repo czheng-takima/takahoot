@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable, lastValueFrom, of } from 'rxjs';
-import { distinctUntilChanged, map, pairwise } from 'rxjs/operators';
+import { BehaviorSubject, Observable, of } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { QuizResponse } from '../components/target/target.component';
 import { Bumper } from '../models/bumper.model';
 import { SerialConnection } from '../models/serial-connection.model';
@@ -9,6 +9,7 @@ import {
   OUT_COMPUTER_CALIBRATION_FINISHED,
   OUT_COMPUTER_CONNECTED,
   OUT_COMPUTER_CONTROLLER_STATE,
+  OutCode,
   TargetInboundMessage
 } from '../models/target-inbound-message.model';
 import {
@@ -89,31 +90,24 @@ export class TargetsService {
   }
 
   async initializeTarget(target: Target, onAnswer: (response: QuizResponse) => void) {
-    await lastValueFrom(this.connect(target));
-    await lastValueFrom(this.startCalibration(target, 0));
-    await lastValueFrom(this.startCalibration(target, 1));
-    await lastValueFrom(this.startCalibration(target, 2));
-    await lastValueFrom(this.startCalibration(target, 3));
-    await lastValueFrom(this.changeTolerance(target, 0, 0x82));
-    await lastValueFrom(this.changeTolerance(target, 1, 0x82));
-    await lastValueFrom(this.changeTolerance(target, 2, 0x82));
-    await lastValueFrom(this.changeTolerance(target, 3, 0x82));
+    await (this.connect(target).toPromise());
+    await (this.startCalibration(target, 3).toPromise());
+    await (this.startCalibration(target, 2).toPromise());
+    await (this.startCalibration(target, 1).toPromise());
+    await (this.startCalibration(target, 0).toPromise());
+    await (this.changeTolerance(target, 3, 0x82).toPromise());
+    await (this.changeTolerance(target, 2, 0x82).toPromise());
+    await (this.changeTolerance(target, 1, 0x82).toPromise());
+    await (this.changeTolerance(target, 0, 0x82).toPromise());
+    await (this.getState(target).toPromise());
     this.readInboundMessages(target)
       .pipe(
-        distinctUntilChanged(),
-        pairwise()
-      )
-      .subscribe(([prev, message]: TargetInboundMessage[]) => {
-        const keys = Object.keys(message);
-        // @ts-ignore
-        const changes = keys.filter(key => prev[key] !== message[key]);
-        console.log('Changed properties:');
-        changes.forEach(key => {
-          // @ts-ignore
-          console.log(`${key}: ${message[key]}`);
-        });
-
-        console.log('code: ' + message.code + ' state: [ ' + JSON.stringify(message.state) + ' ]');
+      // compare by value instead of reference
+      // distinctUntilChanged((old: TargetInboundMessage, current: TargetInboundMessage) => old.code && current.code && old.code === current.code),
+    )
+      .subscribe((message: TargetInboundMessage) => {
+        console.log(`${target.name} --- Message received: ${message.code} as ${OutCode[message.code]}`);
+        console.table(message.state);
         if (message.code === OUT_COMPUTER_BUMPER_HIT) {
           // index is the index of the element that has the attribute hit equals to true inside the array message.state
           const index = message.state?.findIndex((bumper) => bumper.hit === true) ?? -1;
@@ -132,7 +126,6 @@ export class TargetsService {
   }
 
   startCalibration(target: Target, bumperId: number): Observable<boolean> {
-    console.log('startCalibration', bumperId);
     return this.webSerialService.send(target.connection, [IN_COMPUTER_START_CALIBRATION, bumperId]);
   }
 
@@ -179,7 +172,6 @@ export class TargetsService {
           case OUT_COMPUTER_BUMPER_HIT:
           case OUT_COMPUTER_CONTROLLER_STATE:
             state = readState(new DataView(msg.buffer)) as Bumper[];
-            console.log("bumper is hit: [", state[0].hit, state[1].hit, state[2].hit, state[3].hit, "]");
             break;
         }
         return {

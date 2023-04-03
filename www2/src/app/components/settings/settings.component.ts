@@ -19,7 +19,6 @@ export class SettingsComponent implements OnInit {
   targetOutboundMessageCodes = Object.entries(TargetOutboundMessageCode)
     .filter(([key, value]) => typeof value === 'number' && typeof key !== 'number')
     .map(([key, value]) => {
-      console.log(key, value);
       return {
         value: value,
         displayName: `${key} - 0x${value.toString(16)}`,
@@ -40,7 +39,6 @@ export class SettingsComponent implements OnInit {
   onSend() {
     const { selectedConnection, selectedTargetOutboundMessageCode, args } = this.form.value;
     console.log("🚀 ~ file: settings.component.ts:39 ~ SettingsComponent ~ onSend ~  selectedConnection, selectedTargetOutboundMessageCode, args:", selectedConnection, selectedTargetOutboundMessageCode, args)
-
     this.webSerialService.send(selectedConnection, [selectedTargetOutboundMessageCode, args]);
   }
 

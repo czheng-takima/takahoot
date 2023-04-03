@@ -29,7 +29,9 @@ byte* SPIClient::initBumper(byte pin, CRGB color) {
   bool connected = getResponseBuffer();
   digitalWrite(pin, HIGH);
   if (!connected) {
+    #ifdef DEBUG_MODE
     Serial.println("Bumper is not connected");
+    #endif
     return new byte[2]{0x00, 0x00};
   }
   return new byte[2]{buffer[0], buffer[1]};

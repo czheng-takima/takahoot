@@ -28,16 +28,10 @@ export class SerialPortsComponent implements OnInit {
   }
 
   onTargetSelected(data: { index: number; port: string; target$: BehaviorSubject<Target>; actions: string; }, selectedTarget: BehaviorSubject<Target>) {
-    console.log("🚀 ~ file: serial-ports.component.ts:31 ~ SerialPortsComponent ~ onTargetSelected ~ selectedTarget:", selectedTarget)
-
     // Update the selectedTargets object with the selected target for the current row
     this.selectedTargets[data.index] = selectedTarget;
-
     const connections = this.openedConnections$.getValue();
     this.targetService.setConnection(selectedTarget, connections[data.index]);
-    console.log("🚀 ~ file: serial-ports.component.ts:38 ~ SerialPortsComponent ~ onTargetSelected ~ index:", data.index)
-    console.log("🚀 ~ file: serial-ports.component.ts:38 ~ SerialPortsComponent ~ onTargetSelected ~ connections:", connections)
-    // selectedTarget.connection = connections[data.index];
   }
 
   getSelectedTarget(index: number): BehaviorSubject<Target> {

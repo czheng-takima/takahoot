@@ -58,14 +58,12 @@ export class WebSerialService {
 
   private async openPort(port: SerialPort, baudRate = 115200) {
     await port.open({ baudRate });
-    console.log("🚀 ~ file: webserial.service.ts:85 ~ WebSerialService ~ openPort ~ port:", port)
     return port;
   }
 
   private createConnection(port: SerialPort) {
 
     const infos = port.getInfo();
-    console.log("🚀 ~ file: webserial.service.ts:73 ~ WebSerialService ~ createConnection ~ infos:", infos)
 
     if (!port || !port.readable) {
       throw new Error('Invalid or closed SerialPort.');
@@ -117,7 +115,6 @@ export class WebSerialService {
     const subject = new Subject<Uint8Array>();
 
     const write = async (data: Uint8Array) => {
-      console.log("🚀 ~ file: webserial.service.ts:124 ~ WebSerialService ~ write ~ data:", data)
       await writer.write(data);
     };
 
@@ -147,7 +144,6 @@ export class WebSerialService {
   }
 
   send(connection: SerialConnection, message: number[]) {
-    console.log("🚀 ~ file: webserial.service.ts:153 ~ WebSerialService ~ sendToDevice ~ message:", message)
     connection.writeSubject.next(new Uint8Array([...message, CARRIAGE_RETURN, LINE_FEED]));
     return of(true);
   }

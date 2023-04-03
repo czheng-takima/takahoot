@@ -1,8 +1,7 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
-import { distinctUntilKeyChanged, filter, map, pairwise, tap } from 'rxjs/operators';
+import { filter, map, pairwise, startWith, tap } from 'rxjs/operators';
 import { SessionState } from 'src/app/models/session-state.model';
-import { IN_COMPUTER_DISABLE_BUMPERS_AND_BLINK } from 'src/app/models/target-outbound-message.model';
 import { Target } from 'src/app/models/target.model';
 import { FirebaseService } from '../../services/firebase.service';
 import { KahootEngineService } from '../../services/kahoot-engine.service';
@@ -55,17 +54,18 @@ export class TargetComponent implements OnInit {
       .pipe(
         tap((sessions) => this.syncSessionState(sessions)),
         map((sessions: Record<string, SessionState>) => sessions[keyOf(this.gamePin, this.playerName)]),
+        startWith({ acceptingAnswers: true } as SessionState),
         pairwise(),
+        filter(value => value !== undefined && value[0] !== undefined && value[1] !== undefined), // filter out undefined elements
       )
       .subscribe(([previous, current]) => {
-        if (previous['acceptingAnswers'] && !current['acceptingAnswers']) {  // transition acceptingAnswers from true to false
-          console.log("Transition acceptingAnswers from true to false");
+        if (previous.acceptingAnswers && !current.acceptingAnswers) {  // transition acceptingAnswers from true to false
           this.targetsService.disableBumpersAndBlink(this.target);
-        } else if (!previous['acceptingAnswers'] && current['acceptingAnswers']) { // transition acceptingAnswers from false to true
-          console.log("Transition acceptingAnswers from false to true");
+        } else if (!previous.acceptingAnswers && current.acceptingAnswers) { // transition acceptingAnswers from false to true
           this.targetsService.enableBumpers(this.target);
-        } else {
-          console.log("Unexpected transition");
+        } else if (previous.acceptingAnswers === current.acceptingAnswers) { // no transition
+        } else { // unexpected transition
+          console.log("Unexpected transition for acceptingAnswers attribute", previous, current);
         }
       });
 
@@ -93,12 +93,10 @@ export class TargetComponent implements OnInit {
   joinGame() {
     this.kahootEngineService.joinSession(this.gamePin, this.playerName).subscribe((sessionState) => {
       console.log("Joining session " + this.gamePin + " as " + this.playerName);
-      console.log(sessionState);
     });
   }
 
   onAnswer(answer: QuizResponse) {
-    console.log('Answering ' + answer + ' for ' + this.playerName);
     const indexOf = (value: QuizResponse) => Object.values(QuizResponse).indexOf(value);
     this.kahootEngineService.answerQuestion(this.gamePin, this.playerName, indexOf(answer).toString()).subscribe(() => {
     });
@@ -107,4 +105,16 @@ export class TargetComponent implements OnInit {
   reset() {
     this.targetsService.reset(this.target);
   }
+  activateTarget() {
+    this.targetsService.enableBumpers(this.target);
+  }
+
+  deactivateTarget() {
+    this.targetsService.disableBumpersAndBlink(this.target);
+  }
+
+  getState() {
+    this.targetsService.getState(this.target);
+  }
+
 }

@@ -61,12 +61,14 @@ export class KahootService {
       console.error('Session not playable: ' + sessionKey);
       return Promise.reject();
     }
-    if (sessionState.acceptingAnswers) {
+    if (!sessionState.acceptingAnswers) {
       console.error('Session not accepting answers: ' + sessionKey);
+      console.error('Session state: ' + JSON.stringify(sessionState));
       return Promise.reject();
     }
     console.log('Answering question: ' + answer + ' for ' + sessionKey);
-    client.answer(answer);
+    await client.answer(answer);
+    await this.updateSession(sessionKey, { acceptingAnswers: false });
     return Promise.resolve();
   }
 
@@ -78,7 +80,7 @@ export class KahootService {
       return;
     }
     console.log('Disconnecting ' + sessionKey);
-    client.leave();
+    await client.leave();
     this.kahootClients.delete(sessionKey);
     await this.dbReference.child(sessionKey).remove();
   }
@@ -145,11 +147,15 @@ export class KahootService {
 
   private isPlayableSession(sessionState?: SessionState) {
     if (!sessionState) {
-      console.error();
+      console.error('No session state to play');
       return false;
     }
-    if (sessionState.ongoingQuestion < 0) {
-      console.error();
+    if (sessionState.gameState !== 'quiz' || sessionState.ongoingQuestion < 0) {
+      console.error('Session quiz phase not started yet');
+      return false;
+    }
+    if (!sessionState.acceptingAnswers) {
+      console.error('Session not accepting answers yet');
       return false;
     }
     return sessionState.gameState === 'quiz';
