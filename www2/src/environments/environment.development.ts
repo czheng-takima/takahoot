@@ -1,5 +1,5 @@
 export const environment = {
-    serverUrl: 'http://127.0.0.1:3000/kahoot',
+  serverUrl: 'http://127.0.0.1:3000/kahoot',
   firebase: {
     projectId: 'takima-takahoot',
     appId: '1:948003460395:web:46df1d0fc045acef34e16e',

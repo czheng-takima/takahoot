@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable, of, ReplaySubject, Subject, throwError } from 'rxjs';
+import { BehaviorSubject, of, ReplaySubject, Subject, throwError } from 'rxjs';
 import { SerialConnection } from '../models/serial-connection.model';
 
 const CARRIAGE_RETURN = 0x0D;
@@ -152,7 +152,7 @@ export class WebSerialService {
     return this.connections$;
   }
 
-  getMockConnections(): Observable<SerialConnection[]> {
+  getMockConnections(): BehaviorSubject<SerialConnection[]> {
     const mockConnection1: SerialConnection = {
       port: {
         getSignals: () => { return Promise.resolve({ dataCarrierDetect: true, clearToSend: true, ringIndicator: true, dataSetReady: true }); },
@@ -201,7 +201,32 @@ export class WebSerialService {
       writeSubject: new Subject<Uint8Array>(),
       index: 2
     };
-    return of([mockConnection1, mockConnection2]);
+    const mockConnection3: SerialConnection = {
+      port: {
+        getSignals: () => { return Promise.resolve({ dataCarrierDetect: true, clearToSend: true, ringIndicator: true, dataSetReady: true }); },
+        getInfo: () => { return { usbProductId: 0x8037, usbVendorId: 0x2342, usbManufacturerName: "Arduino (www.arduino.cc)", usbProductName: "Arduino Micro 3" } },
+        open: () => { return Promise.resolve() },
+        close: () => { return Promise.resolve() },
+        setSignals: () => { return Promise.resolve() },
+        readable: {
+          getReader: (): ReadableStreamDefaultReader => {
+            return {
+              read: () => {
+              },
+              releaseLock: () => { },
+              cancel: () => { },
+              closed: () => { }
+            } as any as ReadableStreamDefaultReader
+          }
+        } as ReadableStream,
+        writable: null
+      } as any as SerialPort,
+      readSubject: new ReplaySubject<Uint8Array>(),
+      writeSubject: new Subject<Uint8Array>(),
+      index: 2
+    };
+    const subject = new BehaviorSubject<SerialConnection[]>([mockConnection1, mockConnection2, mockConnection3]);
+    return subject;
   }
 
   getConnectionLabel(connection: SerialConnection) {

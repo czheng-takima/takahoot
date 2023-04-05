@@ -1,24 +1,48 @@
 :host {
-    .example-card {
-        max-width: 600px;
+    .card {
+        padding: 16px;
     }
 
-    .example-header-image {
-        background-color: red;
-        background-size: cover;
+    .header-section {}
+
+    .answer-section {
+        width: max(100%, 100px);
+        margin-top: 16px;
+        margin-bottom: 16px;
     }
 
-    mat-grid-tile {
-        button {
-            font-size: xx-large;
+    .buttons-section {}
+
+    .logs-section {}
+
+    .grid {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+
+        .tile {
+
+            flex-basis: calc(50% - 64px);
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+            align-items: center;
+            margin: 16px;
+
+            button {
+                font-size: xx-large;
+                width: 100%;
+                height: 100%;
+                margin-bottom: 80%;
+                transform: translateY(40%);
+            }
+
         }
     }
-
 
     .mat-red {
         background: #E21B3C;
         color: #fff;
-
     }
 
     .mat-blue {
@@ -35,4 +59,5 @@
         background: #26890C;
         color: #fff;
     }
+
 }

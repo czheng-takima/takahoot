@@ -1,21 +1,22 @@
-<div fxLayout.gt-sm="row" fxLayout.lt-sm="column" style="height: 90vh;">
-  <div fxFlex.lt-md="50" fxFlex.gt-md="70" fxLayout="column" fxLayoutAlign="center center">
-    <mat-form-field class="example-form-field">
+<div>
+<!-- <div fxLayout.gt-sm="row" fxLayout.lt-sm="column" style="height: 90vh;"> -->
+  <div fxLayout="column" fxLayoutAlign="space-evenly stretch">
+    <mat-form-field class="game-pin-field">
       <mat-label>Game pin</mat-label>
       <input matInput type="text" [(ngModel)]="gamePin" maxlength="7" style="text-align: center; letter-spacing: 10px;">
       <button *ngIf="!!gamePin" matSuffix mat-icon-button aria-label="Clear" (click)="gamePin=''">
         <mat-icon>close</mat-icon>
       </button>
     </mat-form-field>
-
-    <div fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="16px">
-      <app-target [gamePin]="gamePin" [target$]="targets$[0]"></app-target>
-      <app-target [gamePin]="gamePin" [target$]="targets$[1]"></app-target>
-      <app-target [gamePin]="gamePin" [target$]="targets$[2]"></app-target>
+    <!-- <div fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="16px" class="targets"> -->
+    <div fxLayout="row" fxLayoutAlign="space-between stretch" class="targets">
+      <app-target class="target" [gamePin]="gamePin" [target$]="targets$[0]"></app-target>
+      <app-target class="target" [gamePin]="gamePin" [target$]="targets$[1]"></app-target>
+      <app-target class="target" [gamePin]="gamePin" [target$]="targets$[2]"></app-target>
     </div>
   </div>
-
-  <div fxFlex.gt-sm="30" fxFlex.lt-sm="100" fxLayout="column" fxLayoutAlign="center center" style="margin: 16px;">
+  <div>
+  <!-- <div fxFlex.gt-sm="30" fxFlex.lt-sm="100" fxLayout="column" fxLayoutAlign="center center" style="margin: 16px;"> -->
     <!-- <mat-card fxFill fxLayout="column" fxLayoutAlign="top" >
       <mat-card-header>
         <mat-card-title>Log messages</mat-card-title>

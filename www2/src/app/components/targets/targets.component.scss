@@ -1,0 +1,21 @@
+:host {
+    position: relative;
+
+    .targets {}
+
+    .game-pin-field {
+        margin: 16px;
+        width: min(70svw, 400px);
+        align-self: center;
+    }
+
+    .target {
+        flex-basis: calc((100% - 32px) / 3);
+        max-width: calc((100% - 32px) / 3);
+        margin-right: 16px;
+    }
+
+    .target:last-child {
+        margin-right: 0;
+    }
+}

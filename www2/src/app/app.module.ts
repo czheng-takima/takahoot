@@ -30,6 +30,8 @@ import { TargetsComponent } from './components/targets/targets.component';
 import { KahootEngineService } from './services/kahoot-engine.service';
 import { TargetsService } from './services/targets.service';
 import { WebSerialService } from './services/webserial.service';
+import { TargetLogsComponent } from './components/target-logs/target-logs.component';
+import { ToleranceComponent } from './components/tolerance/tolerance.component';
 
 const materialModules = [
   MatCardModule,
@@ -53,6 +55,8 @@ const materialModules = [
     GameComponent,
     SettingsComponent,
     SerialPortsComponent,
+    TargetLogsComponent,
+    ToleranceComponent,
   ],
   imports: [
     BrowserModule,

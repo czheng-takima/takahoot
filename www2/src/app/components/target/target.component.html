@@ -1,34 +1,38 @@
-<mat-card class="example-card">
-  <mat-card-header>
-    <mat-card-title>{{playerName}}</mat-card-title>
-    <mat-card-subtitle>{{getDetails()}}</mat-card-subtitle>
-  </mat-card-header>
-  <mat-card-content>
-    <mat-grid-list fxLayoutGap="16px" cols="2" rowHeight="1:1">
-      <mat-grid-tile>
-        <button mat-stroked-button color="red" fxFill (click)="onAnswer(QuizResponse.Triangle)">△</button>
-      </mat-grid-tile>
-      <mat-grid-tile>
-        <button mat-stroked-button color="blue" fxFill (click)="onAnswer(QuizResponse.Diamond)">◊</button>
-      </mat-grid-tile>
-      <mat-grid-tile>
-        <button mat-stroked-button color="yellow" fxFill (click)="onAnswer(QuizResponse.Circle)">○</button>
-      </mat-grid-tile>
-      <mat-grid-tile>
-        <button mat-stroked-button color="green" fxFill (click)="onAnswer(QuizResponse.Square)">□</button>
-
-      </mat-grid-tile>
-    </mat-grid-list>
-  </mat-card-content>
-  <mat-card-actions>
-    <!-- <button *ngIf="!isConnected" mat-button (click)="connect()">Connect</button> -->
-    <button *ngIf="isConnected" mat-button (click)="disconnect()">Disconnect</button>
-    <button mat-button (click)="reset()">Reset</button>
-    <button mat-button (click)="joinGame()">Join Game</button>
-    <button mat-button (click)="initialize()">Initialize</button>
-    <button mat-button (click)="activateTarget()">Activate</button>
-    <button mat-button (click)="deactivateTarget()">Deactivate</button>
-    <button mat-button (click)="getState()">Get state</button>
-
-  </mat-card-actions>
-</mat-card>
+<ng-container *ngIf="target$ | async as target">
+  <mat-card *ngIf="target.connection" class="card mat-elevation-z4">
+    <div class="header-section">
+      <mat-card-title>{{target.name}}</mat-card-title>
+      <mat-card-subtitle>{{getDetails()}}</mat-card-subtitle>
+    </div>
+    <mat-card-content fxLayout="column" fxLayoutAlign="space-evenly center">
+      <div class="answer-section mat-elevation-z1">
+        <div class="grid">
+          <div class="tile">
+            <button mat-stroked-button color="red" (click)="onAnswer(QuizResponse.Triangle)">△</button>
+          </div>
+          <div class="tile">
+            <button mat-stroked-button color="blue" (click)="onAnswer(QuizResponse.Diamond)">◊</button>
+          </div>
+          <div class="tile">
+            <button mat-stroked-button color="yellow" (click)="onAnswer(QuizResponse.Circle)">○</button>
+          </div>
+          <div class="tile">
+            <button mat-stroked-button color="green" (click)="onAnswer(QuizResponse.Square)">□</button>
+          </div>
+        </div>
+      </div>
+      <div fxFlex class="buttons-section">
+        <button class="mat-elevation-z1" *ngIf="isConnected" mat-button (click)="disconnect()">Disconnect</button>
+        <button class="mat-elevation-z1" mat-button (click)="reset()">Reset</button>
+        <button class="mat-elevation-z1" mat-button (click)="joinGame()">Join Game</button>
+        <button class="mat-elevation-z1" mat-button (click)="initialize()">Initialize</button>
+        <button class="mat-elevation-z1" mat-button (click)="activateTarget()">Activate</button>
+        <button class="mat-elevation-z1" mat-button (click)="deactivateTarget()">Deactivate</button>
+        <button class="mat-elevation-z1" mat-button (click)="getState()">Get state</button>
+      </div>
+      <div class="logs-section">
+        <app-target-logs style="height: 800px"></app-target-logs>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</ng-container>

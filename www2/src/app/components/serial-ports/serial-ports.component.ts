@@ -13,7 +13,7 @@ import { TargetsService } from '../../services/targets.service';
 @Component({
   selector: 'app-serial-ports',
   templateUrl: './serial-ports.component.html',
-  // styleUrls: ['./serial-ports.component.scss']
+  styleUrls: ['./serial-ports.component.scss']
 })
 export class SerialPortsComponent implements OnInit {
   displayedColumns: string[] = ['index', 'port', 'target', 'actions'];
