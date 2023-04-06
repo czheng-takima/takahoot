@@ -18,7 +18,7 @@ import { TargetsService } from '../../services/targets.service';
 export class SerialPortsComponent implements OnInit {
   displayedColumns: string[] = ['index', 'port', 'target', 'actions'];
   dataSource: { index: number; port: string; target$?: BehaviorSubject<Target>; actions: string; }[] = [];
-  openedConnections$: BehaviorSubject<SerialConnection[]> = this.webSerialService.getConnections();
+  openedConnections$: BehaviorSubject<SerialConnection[]> = this.webSerialService.getMockConnections();
   // serialBindings$: BehaviorSubject<SerialBinding[]> = new BehaviorSubject<SerialBinding[]>([]);
   targets$: BehaviorSubject<Target>[] = this.targetService.getTargets();
   // targets: Target[] = [];
@@ -85,4 +85,24 @@ export class SerialPortsComponent implements OnInit {
     console.table(this.targets$.map(target$ => target$.getValue()));
     console.table(this.selectedTargets);
   }
+
+  reset(target: unknown) {
+    this.targetService.reset(target as Target);
+  }
+
+  getState(target: unknown) {
+    this.targetService.getState(target as Target);
+  }
+
+  activate(target: unknown) {
+    this.targetService.enableBumpers(target as Target);
+  }
+
+  deactivate(target: unknown) {
+    this.targetService.disableBumpersAndBlink(target as Target);
+  }
+
+  disconnect() {
+  }
+
 }

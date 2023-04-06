@@ -2,7 +2,7 @@ import { Component, Input, OnInit } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { filter, map, pairwise, startWith, tap } from 'rxjs/operators';
 import { SessionState } from 'src/app/models/session-state.model';
-import { Target } from 'src/app/models/target.model';
+import { BumperState, Target } from 'src/app/models/target.model';
 import { FirebaseService } from '../../services/firebase.service';
 import { KahootEngineService } from '../../services/kahoot-engine.service';
 import { TargetsService } from '../../services/targets.service';
@@ -115,6 +115,9 @@ export class TargetComponent implements OnInit {
 
   getState() {
     this.targetsService.getState(this.target);
+    this.target.state$.subscribe((stateHistory: BumperState) => {
+      console.log("🚀 ~ file: target.component.ts:119 ~ TargetComponent ~ this.target.state$.subscribe ~ stateHistory:", stateHistory)
+    });
   }
 
 }

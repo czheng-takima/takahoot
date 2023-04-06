@@ -8,20 +8,20 @@
       <div class="answer-section mat-elevation-z1">
         <div class="grid">
           <div class="tile">
-            <button mat-stroked-button color="red" (click)="onAnswer(QuizResponse.Triangle)">△</button>
+            <button mat-raised-button color="red" (click)="onAnswer(QuizResponse.Triangle)">△</button>
           </div>
           <div class="tile">
-            <button mat-stroked-button color="blue" (click)="onAnswer(QuizResponse.Diamond)">◊</button>
+            <button mat-raised-button color="blue" (click)="onAnswer(QuizResponse.Diamond)">◊</button>
           </div>
           <div class="tile">
-            <button mat-stroked-button color="yellow" (click)="onAnswer(QuizResponse.Circle)">○</button>
+            <button mat-raised-button color="yellow" (click)="onAnswer(QuizResponse.Circle)">○</button>
           </div>
           <div class="tile">
-            <button mat-stroked-button color="green" (click)="onAnswer(QuizResponse.Square)">□</button>
+            <button mat-raised-button color="green" (click)="onAnswer(QuizResponse.Square)">□</button>
           </div>
         </div>
       </div>
-      <div fxFlex class="buttons-section">
+      <div class="buttons-section">
         <button class="mat-elevation-z1" *ngIf="isConnected" mat-button (click)="disconnect()">Disconnect</button>
         <button class="mat-elevation-z1" mat-button (click)="reset()">Reset</button>
         <button class="mat-elevation-z1" mat-button (click)="joinGame()">Join Game</button>
@@ -31,7 +31,7 @@
         <button class="mat-elevation-z1" mat-button (click)="getState()">Get state</button>
       </div>
       <div class="logs-section">
-        <app-target-logs style="height: 800px"></app-target-logs>
+        <app-target-logs [target$]="target$" style="height: 800px"></app-target-logs>
       </div>
     </mat-card-content>
   </mat-card>

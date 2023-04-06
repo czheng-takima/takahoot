@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable, of } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { BehaviorSubject, Observable, ReplaySubject, of } from 'rxjs';
+import { last, map } from 'rxjs/operators';
 import { QuizResponse } from '../components/target/target.component';
 import { Bumper } from '../models/bumper.model';
 import { SerialConnection } from '../models/serial-connection.model';
@@ -57,19 +57,19 @@ export class TargetsService {
       index: 1,
       name: 'Target 1',
       connection: null as any as SerialConnection,
-      state: []
+      state$: this.createBumpersStateReplaySubject()
     }),
     new BehaviorSubject<Target>({
       index: 2,
       name: 'Target 2',
       connection: null as any as SerialConnection,
-      state: []
+      state$: this.createBumpersStateReplaySubject()
     }),
     new BehaviorSubject<Target>({
       index: 3,
       name: 'Target 3',
       connection: null as any as SerialConnection,
-      state: []
+      state$: this.createBumpersStateReplaySubject()
     })
   ];
 
@@ -85,8 +85,8 @@ export class TargetsService {
   }
 
   setConnection(target$: BehaviorSubject<Target>, connection: SerialConnection): void {
-    const updatedTarget = { ...target$.getValue(), connection };
-    target$.next(updatedTarget);
+    const updatedTarget = { ...target$?.getValue(), connection };
+    target$?.next(updatedTarget);
   }
 
   async initializeTarget(target: Target, onAnswer: (response: QuizResponse) => void) {
@@ -127,6 +127,13 @@ export class TargetsService {
 
   startCalibration(target: Target, bumperId: number): Observable<boolean> {
     return this.webSerialService.send(target.connection, [IN_COMPUTER_START_CALIBRATION, bumperId]);
+  }
+
+  getTolerance(target: Target, bumperId: number) {
+    return target.state$.pipe(
+      last(),
+      map((state: Bumper[]) => state[bumperId].tolerance)
+    );
   }
 
   changeTolerance(target: Target, bumperId: number, tolerance: number) {
@@ -174,6 +181,9 @@ export class TargetsService {
             state = readState(new DataView(msg.buffer)) as Bumper[];
             break;
         }
+        if (state) {
+          target.state$.next(state);
+        }
         return {
           code: code,
           state: state
@@ -216,12 +226,25 @@ export class TargetsService {
     }
     return of(false);
   }
+
+  private createBumpersStateReplaySubject(length = 100): ReplaySubject<Bumper[]> {
+    const subject = new ReplaySubject<Bumper[]>(length);
+    subject.next([
+      { calibrating: false, connected: false, enabled: false, hit: false, id: 0, tolerance: 0 },
+      { calibrating: false, connected: false, enabled: false, hit: false, id: 1, tolerance: 0 },
+      { calibrating: false, connected: false, enabled: false, hit: false, id: 2, tolerance: 0 },
+      { calibrating: false, connected: false, enabled: false, hit: false, id: 3, tolerance: 0 }] as Bumper[]);
+
+
+    setInterval(() => {
+      subject.next([
+        { calibrating: false, connected: false, enabled: false, hit: false, id: 0, tolerance: 30 },
+        { calibrating: false, connected: false, enabled: false, hit: false, id: 1, tolerance: 60 },
+        { calibrating: false, connected: false, enabled: false, hit: false, id: 2, tolerance: 90 },
+        { calibrating: false, connected: false, enabled: false, hit: false, id: 3, tolerance: 120 }] as Bumper[]);
+    }, 10000);
+    return subject;
+  }
+
 }
-const serialConnectionToTarget = (serialConnection: SerialConnection): Target => {
-  return {
-    index: serialConnection.index,
-    name: Object.values(serialConnection.port.getInfo()).join(" - ") || '',
-    connection: serialConnection,
-    state: []
-  };
-};
+

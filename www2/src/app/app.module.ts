@@ -15,6 +15,8 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatListModule } from '@angular/material/list';
 import { MatSelectModule } from '@angular/material/select';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { MatSliderModule } from '@angular/material/slider';
 import { MatTableModule } from '@angular/material/table';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatToolbarModule } from '@angular/material/toolbar';
@@ -25,13 +27,13 @@ import { AppComponent } from './app.component';
 import { GameComponent } from './components/game/game.component';
 import { SerialPortsComponent } from './components/serial-ports/serial-ports.component';
 import { SettingsComponent } from './components/settings/settings.component';
+import { TargetLogsComponent } from './components/target-logs/target-logs.component';
 import { TargetComponent } from './components/target/target.component';
 import { TargetsComponent } from './components/targets/targets.component';
+import { ToleranceComponent } from './components/tolerance/tolerance.component';
 import { KahootEngineService } from './services/kahoot-engine.service';
 import { TargetsService } from './services/targets.service';
 import { WebSerialService } from './services/webserial.service';
-import { TargetLogsComponent } from './components/target-logs/target-logs.component';
-import { ToleranceComponent } from './components/tolerance/tolerance.component';
 
 const materialModules = [
   MatCardModule,
@@ -45,6 +47,8 @@ const materialModules = [
   MatListModule,
   MatCheckboxModule,
   MatTableModule,
+  MatSliderModule,
+  MatSlideToggleModule,
 ];
 
 @NgModule({

@@ -2,7 +2,8 @@
     <mat-form-field>
         <mat-label>Select Connection Port</mat-label>
         <mat-select formControlName="selectedConnection">
-            <mat-option [value]="connection" *ngFor="let connection of connections | async">{{toLabel(connection)}}</mat-option>
+            <mat-option [value]="connection"
+                *ngFor="let connection of connections | async">{{toLabel(connection)}}</mat-option>
         </mat-select>
     </mat-form-field>
 
@@ -18,7 +19,8 @@
     <mat-form-field>
         <mat-label>Optional argument</mat-label>
         <input matInput formControlName="args">
-        <mat-error *ngIf="!form.get('args')?.valid">Invalid hex string format (either empty, or 0x00, or 0x00 0x00, or 0x00 0x00 0x00 allowed)</mat-error>
+        <mat-error *ngIf="!form.get('args')?.valid">Invalid hex string format (either empty, or 0x00, or 0x00 0x00, or
+            0x00 0x00 0x00 allowed)</mat-error>
     </mat-form-field>
 
     <button mat-raised-button color="primary" [disabled]="!form.valid" (click)="onSend()">Send</button>

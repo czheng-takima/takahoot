@@ -11,9 +11,23 @@
         margin-bottom: 16px;
     }
 
-    .buttons-section {}
+    .buttons-section {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: space-evenly;
+        align-items: stretch;
+        align-content: space-between;
+        
+        button {
+            margin: 8px;
+        }
+    }
 
-    .logs-section {}
+    .logs-section {
+        height: 500px;
+        width: 100%;
+    }
 
     .grid {
         display: flex;
