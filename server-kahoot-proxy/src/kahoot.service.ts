@@ -27,7 +27,10 @@ export class KahootService {
     this.dbReference = database.ref(`/sessions`);
   }
 
-  async joinSession(sessionId: string, playerName: string): Promise<void> {
+  async joinSession(
+    sessionId: string,
+    playerName: string,
+  ): Promise<SessionState> {
     const client = new Client();
     console.log('Joining session: ' + sessionId + ' as ' + playerName);
     await client.join(sessionId, playerName).catch((err: Error) => {
@@ -40,20 +43,21 @@ export class KahootService {
     const sessionKey = this.keyOf(sessionId, playerName);
     this.setCallbacks(sessionKey, client);
     this.kahootClients.set(sessionKey, client);
-    this.dbReference.child(sessionKey).set({
+    const sessionState: SessionState = {
       sessionKey,
       gameState: 'lobby',
       ongoingQuestion: -2,
       acceptingAnswers: false,
-    } as SessionState);
-    return Promise.resolve();
+    };
+    this.dbReference.child(sessionKey).set(sessionState);
+    return Promise.resolve(sessionState);
   }
 
   async answerQuestion(
     sessionId: string,
     playerName: string,
     answer: number,
-  ): Promise<void> {
+  ): Promise<SessionState> {
     const sessionKey = this.keyOf(sessionId, playerName);
     const client = this.kahootClients.get(sessionKey);
     const sessionState = await this.getSessionState(sessionKey);
@@ -69,7 +73,7 @@ export class KahootService {
     console.log('Answering question: ' + answer + ' for ' + sessionKey);
     await client.answer(answer);
     await this.updateSession(sessionKey, { acceptingAnswers: false });
-    return Promise.resolve();
+    return Promise.resolve(sessionState);
   }
 
   async disconnect(sessionId: string, playerName: string) {
@@ -83,6 +87,7 @@ export class KahootService {
     await client.leave();
     this.kahootClients.delete(sessionKey);
     await this.dbReference.child(sessionKey).remove();
+    return Promise.resolve({});
   }
 
   private keyOf(sessionId: string, playerName: string) {
