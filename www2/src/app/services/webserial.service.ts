@@ -100,8 +100,8 @@ export class WebSerialService {
     subject.subscribe({
       next: read,
       complete: () => {
-        reader.releaseLock();
         reader.cancel();
+        reader.releaseLock();
       },
       error: err => console.error('Error while reading data from serial port:', err)
     });
@@ -121,8 +121,8 @@ export class WebSerialService {
     subject.subscribe({
       next: write,
       complete: () => {
-        writer.releaseLock();
         writer.close();
+        writer.releaseLock();
       },
       error: err => console.error('Error while writing data to serial port:', err)
     });
@@ -134,12 +134,17 @@ export class WebSerialService {
     if (connection) {
       connection.readSubject.complete();
       connection.writeSubject.complete();
-      await connection.port.close();
+      try {
+        await connection.port.close();
+      } catch (error) {
+        console.error('Error while closing serial port:', error);
+      }
       const index = this.connections$.getValue().indexOf(connection);
       if (index !== -1) {
         this.connections$.getValue().splice(index, 1);
       }
     }
+    console.log(`Disconnected port ${connection.index}`);
     return of(true);
   }
 

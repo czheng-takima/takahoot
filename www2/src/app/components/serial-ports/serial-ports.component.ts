@@ -18,7 +18,7 @@ import { TargetsService } from '../../services/targets.service';
 export class SerialPortsComponent implements OnInit {
   displayedColumns: string[] = ['index', 'port', 'target', 'actions'];
   dataSource: { index: number; port: string; target$?: BehaviorSubject<Target>; actions: string; }[] = [];
-  openedConnections$: BehaviorSubject<SerialConnection[]> = this.webSerialService.getMockConnections();
+  openedConnections$: BehaviorSubject<SerialConnection[]> = this.webSerialService.getConnections();
   // serialBindings$: BehaviorSubject<SerialBinding[]> = new BehaviorSubject<SerialBinding[]>([]);
   targets$: BehaviorSubject<Target>[] = this.targetService.getTargets();
   // targets: Target[] = [];
@@ -50,18 +50,6 @@ export class SerialPortsComponent implements OnInit {
       });
     });
 
-    // // Convert each BehaviorSubject<Target> to a Target object and push it to the targets array
-    // this.targets$.forEach(target$ => {
-    //   this.targets.push(target$.getValue());
-    // });
-
-    // // Subscribe to each BehaviorSubject<Target> and update the targets array with the latest value
-    // this.targets$.forEach((target$, index) => {
-    //   target$.subscribe(value => {
-    //     this.targets[index] = value;
-    //   });
-    // });
-
     // Subscribe to the openedConnections$ observable
     this.openedConnections$.subscribe((connections: SerialConnection[]) => {
       // Update the dataSource array with the new connections
@@ -81,11 +69,6 @@ export class SerialPortsComponent implements OnInit {
     this.webSerialService.requestPort();
   }
 
-  test() {
-    console.table(this.targets$.map(target$ => target$.getValue()));
-    console.table(this.selectedTargets);
-  }
-
   reset(target: unknown) {
     this.targetService.reset(target as Target);
   }
@@ -103,6 +86,10 @@ export class SerialPortsComponent implements OnInit {
   }
 
   disconnect() {
+    this.openedConnections$.subscribe((connections: SerialConnection[]) => {
+      connections.forEach((connection) => this.webSerialService.disconnectPort(connection));
+    });
+    this.openedConnections$.next([]);
+    console.log(this.selectedTargets)
   }
-
 }

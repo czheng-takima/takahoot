@@ -2,7 +2,7 @@ import { Component, Input, OnInit } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { filter, map, pairwise, startWith, tap } from 'rxjs/operators';
 import { SessionState } from 'src/app/models/session-state.model';
-import { BumperState, Target } from 'src/app/models/target.model';
+import { Target } from 'src/app/models/target.model';
 import { FirebaseService } from '../../services/firebase.service';
 import { KahootEngineService } from '../../services/kahoot-engine.service';
 import { TargetsService } from '../../services/targets.service';
@@ -27,7 +27,6 @@ export class TargetComponent implements OnInit {
   QuizResponse = QuizResponse;
 
   playerName: string = "Undefined";
-  isConnected = false;
   counter = 0;
   target: Target = {} as Target;
 
@@ -44,7 +43,6 @@ export class TargetComponent implements OnInit {
   async initialize() {
     await this.targetsService.initializeTarget(this.target, this.onAnswer.bind(this));
     this.playerName = this.target.name;
-    this.isConnected = true;
   }
 
   ngOnInit(): void {
@@ -72,7 +70,7 @@ export class TargetComponent implements OnInit {
   }
 
   getDetails() {
-    return `Connected: ${this.isConnected} |\n
+    return `
     Game state: ${this.sessionState.gameState} |\n
     Ongoing question: ${this.sessionState.ongoingQuestion} |\n
     Accepting answers: ${this.sessionState.acceptingAnswers} |\n
@@ -85,9 +83,6 @@ export class TargetComponent implements OnInit {
         Object.assign(this.sessionState, sessionState);
       }
     });
-  }
-  disconnect() {
-    this.isConnected = false;
   }
 
   joinGame() {
@@ -115,9 +110,6 @@ export class TargetComponent implements OnInit {
 
   getState() {
     this.targetsService.getState(this.target);
-    this.target.state$.subscribe((stateHistory: BumperState) => {
-      console.log("🚀 ~ file: target.component.ts:119 ~ TargetComponent ~ this.target.state$.subscribe ~ stateHistory:", stateHistory)
-    });
   }
 
 }

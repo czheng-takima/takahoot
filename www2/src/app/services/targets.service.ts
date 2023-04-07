@@ -234,15 +234,6 @@ export class TargetsService {
       { calibrating: false, connected: false, enabled: false, hit: false, id: 1, tolerance: 0 },
       { calibrating: false, connected: false, enabled: false, hit: false, id: 2, tolerance: 0 },
       { calibrating: false, connected: false, enabled: false, hit: false, id: 3, tolerance: 0 }] as Bumper[]);
-
-
-    setInterval(() => {
-      subject.next([
-        { calibrating: false, connected: false, enabled: false, hit: false, id: 0, tolerance: 30 },
-        { calibrating: false, connected: false, enabled: false, hit: false, id: 1, tolerance: 60 },
-        { calibrating: false, connected: false, enabled: false, hit: false, id: 2, tolerance: 90 },
-        { calibrating: false, connected: false, enabled: false, hit: false, id: 3, tolerance: 120 }] as Bumper[]);
-    }, 10000);
     return subject;
   }
 

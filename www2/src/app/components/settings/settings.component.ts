@@ -13,7 +13,7 @@ import { TargetOutboundMessageCode } from 'src/app/models/target-outbound-messag
 export class SettingsComponent implements OnInit {
   form!: FormGroup;
 
-  connections: Observable<SerialConnection[]> = this.webSerialService.getMockConnections();
+  connections: Observable<SerialConnection[]> = this.webSerialService.getConnections();
   selectedConnection: SerialConnection | undefined;
 
   targetOutboundMessageCodes = Object.entries(TargetOutboundMessageCode)

@@ -22,16 +22,14 @@
         </div>
       </div>
       <div class="buttons-section">
-        <button class="mat-elevation-z1" *ngIf="isConnected" mat-button (click)="disconnect()">Disconnect</button>
-        <button class="mat-elevation-z1" mat-button (click)="reset()">Reset</button>
         <button class="mat-elevation-z1" mat-button (click)="joinGame()">Join Game</button>
         <button class="mat-elevation-z1" mat-button (click)="initialize()">Initialize</button>
-        <button class="mat-elevation-z1" mat-button (click)="activateTarget()">Activate</button>
-        <button class="mat-elevation-z1" mat-button (click)="deactivateTarget()">Deactivate</button>
-        <button class="mat-elevation-z1" mat-button (click)="getState()">Get state</button>
       </div>
       <div class="logs-section">
-        <app-target-logs [target$]="target$" style="height: 800px"></app-target-logs>
+        <app-target-logs ></app-target-logs>
+      </div>
+      <div class="tolerance-section">
+        <app-tolerance [target$]="target$" ></app-tolerance>
       </div>
     </mat-card-content>
   </mat-card>

@@ -1,8 +1,0 @@
-<div fxLayout="column" fxLayoutAlign="space-between stretch">
-    <div fxLayout="column" fxLayoutAlign="center stretch" *ngFor="let tolerance of tolerances; let index = index">
-        <mat-slider [displayWith]="formatSliderLabel" min="0" max="255" step="1" [showTickMarks]="false" discrete>
-            <input matSliderThumb [ngModel]="tolerances[index]" (valueChange)="toleranceChange($event, index)" />
-        </mat-slider>
-    </div>
-    <button mat-raised-button color="primary" (click)="submitTolerances()">Set Tolerance</button>
-</div>
