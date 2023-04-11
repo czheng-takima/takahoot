@@ -4,16 +4,20 @@ The Takahoot controller is a standard unit which can connect up to 4 triggers wi
 It is supposed to be connected to a computer via its USB cable.
 
 #### UPLOADING OF THE CONTROLLER
-First you will need to install the [WebUsb](https://github.com/webusb/arduino) library into your [ArduinoIDE](https://www.arduino.cc/en/main/software)
+~~First you will need to install the [WebUsb](https://github.com/webusb/arduino) library into your [ArduinoIDE](https://www.arduino.cc/en/main/software)~~
+The controller is using now WebSerial instead of WebUSB.
+Make sure the dependency is available inside your Arduino IDE (default path `/usr/share/arduino/hardware/arduino/avr/cores/arduino/USBCore.h`).
+
 
 You are normally ready to upload the code into your controller if you still get an error watch the troobleshoot below.
 
-Troobleshoot : 
-On some version of linux you will have to temporarily disable the ModemManager to let arduino do his job.
+Troubleshoot : 
+- On some version of linux you will have to temporarily disable the ModemManager to let arduino do his job.
 Just run ```$ systemctl stop ModemManager.service``` to stop it.
 You can check the status of the modem by ```$ systemctl status ModemManager.service```
 Don't worry the Modem will come back when you restart your computer.
 
+- Do not use the new version of Arduino IDE. Use version 1.8.
 
 
 ## Serial protocol

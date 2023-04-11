@@ -50,3 +50,5 @@ Thanks to [Nicolas Thierion](https://github.com/NicolasThierion) for coming up w
  * [Alexandre Nunesse](https://github.com/anunesse) - Kahoot API, Target fixes & Takahoot Client
  * [Logan Lepage](https://github.com/loganlepage) - Takahoot UI & Client
  * [Loïc Ortola](https://github.com/loicortola) - Target design & making, Hardware & Arduino
+ * [Christian Zheng](https://github.com/czheng-takima) - 2023 update of Kahoot breach, new Takahoot UI and new project architecture
+ * [François de Guibert](https://github.com/fdeguibert) - 2023 update and fixes of Arduino software and hardware
