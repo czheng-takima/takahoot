@@ -1,14 +1,14 @@
-import {Injectable} from '@angular/core';
-import {Actions, Effect, ofType} from '@ngrx/effects';
-import {TargetsActionTypes} from './targets.actions';
-import {catchError, map, switchMap} from 'rxjs/operators';
-import {Target} from '../models/target.model';
-import {of} from 'rxjs';
+import { Injectable } from '@angular/core';
+import { Actions, Effect, ofType } from '@ngrx/effects';
+import { of } from 'rxjs';
+import { catchError, map, switchMap } from 'rxjs/operators';
+import { Target } from '../models/target.model';
+import { TargetsActionTypes } from './targets.actions';
 
-import * as fromTargets from './../store/targets.actions';
-import {WebusbService} from '../../shared/services/webusb.service';
-import {TargetsService} from '../services/targets.service';
-import {TargetOutboundMessage} from '../models/target-outbound-message.model';
+import { WebusbService } from '../../shared/services/webusb.service';
+import { TargetOutboundMessage } from '../models/target-outbound-message.model';
+import { TargetsService } from '../services/targets.service';
+import * as fromTargets from './targets.actions';
 
 
 function deviceToTarget(index: number, device: USBDevice): Target {
@@ -31,7 +31,7 @@ export class TargetsEffects {
         private webusbService: WebusbService,
         private targetsService: TargetsService,
         //private store: Store<AppState>
-        ) {
+    ) {
     }
 
     @Effect()
@@ -39,10 +39,10 @@ export class TargetsEffects {
         ofType(TargetsActionTypes.TARGETS_QUERY),
         switchMap(() => this.webusbService.refreshDevices()
             .pipe(map((data) => {
-                    const targets: Target[] = data.map((device, index) => deviceToTarget(index, device));
-                    return (new fromTargets.TargetsLoaded({targets: targets}));
-                }),
-                catchError(error => of(new fromTargets.TargetsError({error})))
+                const targets: Target[] = data.map((device, index) => deviceToTarget(index, device));
+                return (new fromTargets.TargetsLoaded({ targets: targets }));
+            }),
+                catchError(error => of(new fromTargets.TargetsError({ error })))
             )
         )
     );
@@ -56,15 +56,15 @@ export class TargetsEffects {
                 if (claimed) {
                     return (new fromTargets.TargetsRefresh());
                 }
-            }), catchError(error => of(new fromTargets.TargetsError({error}))))
+            }), catchError(error => of(new fromTargets.TargetsError({ error }))))
         )
     );
 
-    @Effect({dispatch: false})
+    @Effect({ dispatch: false })
     sendMessage$ = this.actions$.pipe(
         ofType(TargetsActionTypes.TARGET_SEND_MESSAGE),
         map((action: fromTargets.TargetSendMessage) => action.payload),
-        switchMap((data: {message: TargetOutboundMessage, target: Target}) => this.targetsService.sendMessage(data.message, data.target))
+        switchMap((data: { message: TargetOutboundMessage, target: Target }) => this.targetsService.sendMessage(data.message, data.target))
     );
 
     @Effect()
@@ -76,7 +76,7 @@ export class TargetsEffects {
                 if (success) {
                     return (new fromTargets.TargetsRefresh());
                 }
-            }), catchError(error => of(new fromTargets.TargetsError({error}))))
+            }), catchError(error => of(new fromTargets.TargetsError({ error }))))
         )
     );
 

@@ -1,13 +1,9 @@
-import {Component, OnDestroy, OnInit} from '@angular/core';
-import {MDBModalRef} from 'angular-bootstrap-md';
-import {Target} from '../models/target.model';
-import {AppState} from '../../reducers/index';
-import {select, Store} from '@ngrx/store';
-import * as fromTargets from './../store/targets.actions';
-import {Observable, Subscription} from 'rxjs';
-import {getAllLoaded, getTargets} from '../store/targets.selectors';
-import {map} from 'rxjs/operators';
-import {TargetsService} from '../services/targets.service';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Store, select } from '@ngrx/store';
+import { MDBModalRef } from 'angular-bootstrap-md';
+import { Observable, Subscription } from 'rxjs';
+import { map } from 'rxjs/operators';
+import { AppState } from '../../reducers/index';
 import {
   IN_COMPUTER_CONNECTED,
   IN_COMPUTER_DISABLE_BUMPERS_AND_BLINK,
@@ -17,6 +13,10 @@ import {
   IN_COMPUTER_RESET,
   IN_COMPUTER_START_CALIBRATION
 } from '../models/target-outbound-message.model';
+import { Target } from '../models/target.model';
+import { TargetsService } from '../services/targets.service';
+import * as fromTargets from '../store/targets.actions';
+import { getAllLoaded, getTargets } from '../store/targets.selectors';
 
 @Component({
   selector: 'app-targets',
@@ -43,15 +43,15 @@ export class TargetsComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.isLoading$ = this.store.select(getAllLoaded);
     this.targets$ = this.store.pipe(
-        select(getTargets),
-        map((targets: Target[]) => {
-          if (!targets || targets.length === 0) {
-            this.store.dispatch(new fromTargets.TargetsRefresh());
-          }
-          this.updateSubscriptions(targets);
-          this.targets = targets;
-          return targets;
-        })
+      select(getTargets),
+      map((targets: Target[]) => {
+        if (!targets || targets.length === 0) {
+          this.store.dispatch(new fromTargets.TargetsRefresh());
+        }
+        this.updateSubscriptions(targets);
+        this.targets = targets;
+        return targets;
+      })
     );
   }
 
@@ -66,9 +66,9 @@ export class TargetsComponent implements OnInit, OnDestroy {
       if (!sub && t.claimed) {
         let subscription = this.targetsService.readInboundMessages(t).subscribe(tim => {
           console.log(tim);
-          this.store.dispatch(new fromTargets.TargetInboundMessageReceived({targetIndex: t.index, message: tim}));
+          this.store.dispatch(new fromTargets.TargetInboundMessageReceived({ targetIndex: t.index, message: tim }));
         });
-        this.targetSubscriptions.push({index: t.index, subscription: subscription, timeout: undefined});
+        this.targetSubscriptions.push({ index: t.index, subscription: subscription, timeout: undefined });
         this.onConnect(t);
         this.refreshStateEverySecond(t);
       } else if (sub && !t.claimed) {
@@ -80,21 +80,21 @@ export class TargetsComponent implements OnInit, OnDestroy {
   }
 
   onConnect(target: Target) {
-    this.store.dispatch(new fromTargets.TargetSendMessage({message: {code: IN_COMPUTER_CONNECTED}, target}));
+    this.store.dispatch(new fromTargets.TargetSendMessage({ message: { code: IN_COMPUTER_CONNECTED }, target }));
   }
 
   onRefreshState(target: Target) {
-    this.store.dispatch(new fromTargets.TargetSendMessage({message: {code: IN_COMPUTER_GET_STATE}, target}));
+    this.store.dispatch(new fromTargets.TargetSendMessage({ message: { code: IN_COMPUTER_GET_STATE }, target }));
   }
 
   onReset(target: Target) {
-    this.store.dispatch(new fromTargets.TargetSendMessage({message: {code: IN_COMPUTER_RESET}, target}));
+    this.store.dispatch(new fromTargets.TargetSendMessage({ message: { code: IN_COMPUTER_RESET }, target }));
   }
 
   onCalibrate(target: Target) {
     for (let b of target.state) {
       if (b.connected) {
-        this.store.dispatch(new fromTargets.TargetSendMessage({message: {code: IN_COMPUTER_START_CALIBRATION, bumperId: b.id}, target}));
+        this.store.dispatch(new fromTargets.TargetSendMessage({ message: { code: IN_COMPUTER_START_CALIBRATION, bumperId: b.id }, target }));
       }
     }
   }
@@ -102,13 +102,13 @@ export class TargetsComponent implements OnInit, OnDestroy {
   onEnableBumpers(target: Target) {
     for (let b of target.state) {
       if (b.connected) {
-        this.store.dispatch(new fromTargets.TargetSendMessage({message: {code: IN_COMPUTER_ENABLE_BUMPER, bumperId: b.id}, target}));
+        this.store.dispatch(new fromTargets.TargetSendMessage({ message: { code: IN_COMPUTER_ENABLE_BUMPER, bumperId: b.id }, target }));
       }
     }
   }
 
   onDisableBumpers(target: Target) {
-    this.store.dispatch(new fromTargets.TargetSendMessage({message: {code: IN_COMPUTER_DISABLE_BUMPERS_AND_BLINK}, target}));
+    this.store.dispatch(new fromTargets.TargetSendMessage({ message: { code: IN_COMPUTER_DISABLE_BUMPERS_AND_BLINK }, target }));
   }
 
   ngOnDestroy() {
@@ -120,21 +120,21 @@ export class TargetsComponent implements OnInit, OnDestroy {
   claimAll() {
     if (this.targets) {
       this.targets.forEach(t => {
-        this.store.dispatch(new fromTargets.TargetClaim({target: t}));
+        this.store.dispatch(new fromTargets.TargetClaim({ target: t }));
       });
     }
   }
 
   private refreshStateEverySecond(t: Target) {
     this.targetSubscriptions[t.index].timeout = setInterval(() => this.store.dispatch(new fromTargets.TargetSendMessage({
-      message: {code: IN_COMPUTER_GET_STATE},
+      message: { code: IN_COMPUTER_GET_STATE },
       target: t
     })), 1000);
   }
 
   unclaimAll() {
-      console.log("this function should be implemented sorry");
-      //todo implement
+    console.log("this function should be implemented sorry");
+    //todo implement
   }
 
   setAutoReset(ar: boolean) {
@@ -148,7 +148,7 @@ export class TargetsComponent implements OnInit, OnDestroy {
           // Dispatch reset 3 seconds after
           this.autoResetInProgress = true;
           setTimeout(() => {
-            this.store.dispatch(new fromTargets.TargetSendMessage({message: {code: IN_COMPUTER_ENABLE_BUMPERS}, target: t}));
+            this.store.dispatch(new fromTargets.TargetSendMessage({ message: { code: IN_COMPUTER_ENABLE_BUMPERS }, target: t }));
             setTimeout(() => {
               this.autoResetInProgress = false;
             }, 1000);
@@ -162,7 +162,7 @@ export class TargetsComponent implements OnInit, OnDestroy {
 
   }
 
-  selectDevices(){
+  selectDevices() {
     this.targetsService.selectDevices();
   }
 }
