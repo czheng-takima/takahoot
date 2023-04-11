@@ -6,8 +6,11 @@
 
 <div class="container-fluid pb-5">
   <div class="py-5">
-    <button mdbBtn color="primary" class="ml-3" (click)="testButton()">Establish connection</button>
-    <button mdbBtn color="primary" class="ml-3" (click)="testButton2()">Enable bumpers</button>
+    <button mdbBtn color="primary" class="ml-3" (click)="claimAll()">Claim All</button>
+    <button *ngIf="!this.autoReset" mdbBtn color="primary" class="ml-3" (click)="setAutoReset(true)">Enable AutoReset</button>
+    <button *ngIf="this.autoReset!!" mdbBtn color="primary" class="ml-3" (click)="setAutoReset(false)">Disable AutoReset</button>
+    <button mdbBtn color="primary" class="ml-3" (click)="selectDevices()">Select Devices</button>
+
     <app-targets-list [targets]="targets$ | async"
 
                       (calibrate)="onCalibrate($event)"

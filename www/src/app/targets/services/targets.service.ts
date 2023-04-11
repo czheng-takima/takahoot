@@ -1,9 +1,7 @@
-import { Injectable } from '@angular/core';
-import { Observable, of } from 'rxjs';
-import { map } from 'rxjs/operators';
-import { WebSerialService } from 'src/app/shared/services/webserial.service';
-import { SerialConnection } from '../../shared/services/webserial.service';
-import { Bumper } from '../models/bumper.model';
+import {Injectable} from '@angular/core';
+import {WebusbService} from '../../shared/services/webusb.service';
+import {Target} from '../models/target.model';
+import {Observable, of} from 'rxjs';
 import {
   OUT_COMPUTER_BUMPER_HIT,
   OUT_COMPUTER_CALIBRATION_FINISHED,
@@ -11,16 +9,20 @@ import {
   OUT_COMPUTER_CONTROLLER_STATE,
   TargetInboundMessage
 } from '../models/target-inbound-message.model';
+import {Bumper} from '../models/bumper.model';
+import {map} from 'rxjs/operators';
 import {
   IN_COMPUTER_CHANGE_TOLERANCE,
   IN_COMPUTER_CONNECTED,
-  IN_COMPUTER_DISABLE_BUMPER, IN_COMPUTER_DISABLE_BUMPERS_AND_BLINK, IN_COMPUTER_DISABLE_BUMPER_AND_BLINK, IN_COMPUTER_ENABLE_BUMPER, IN_COMPUTER_ENABLE_BUMPERS,
+  IN_COMPUTER_DISABLE_BUMPER,
+  IN_COMPUTER_DISABLE_BUMPER_AND_BLINK,
+  IN_COMPUTER_DISABLE_BUMPERS_AND_BLINK,
+  IN_COMPUTER_ENABLE_BUMPER, IN_COMPUTER_ENABLE_BUMPERS,
   IN_COMPUTER_GET_STATE,
   IN_COMPUTER_RESET,
   IN_COMPUTER_START_CALIBRATION,
   TargetOutboundMessage
 } from '../models/target-outbound-message.model';
-import { Target } from '../models/target.model';
 
 
 function readState(data: DataView | undefined): Bumper[] | undefined {
@@ -50,83 +52,78 @@ function readState(data: DataView | undefined): Bumper[] | undefined {
 })
 export class TargetsService {
 
-  constructor(private webSerialService: WebSerialService) {
+  constructor(private webusbService: WebusbService) {
   }
 
   connect(target: Target): Observable<boolean> {
-    return this.webSerialService.send(target.connection, [IN_COMPUTER_CONNECTED]);
+    return this.webusbService.sendToDevice(target.index, [IN_COMPUTER_CONNECTED]).pipe(map(r => r.status === 'ok'));
   }
 
   reset(target: Target): Observable<boolean> {
-    return this.webSerialService.send(target.connection, [IN_COMPUTER_RESET]);
+    return this.webusbService.sendToDevice(target.index, [IN_COMPUTER_RESET]).pipe(map(r => r.status === 'ok'));
   }
 
   startCalibration(target: Target, bumperId: number): Observable<boolean> {
-    return this.webSerialService.send(target.connection, [IN_COMPUTER_START_CALIBRATION, bumperId]);
+    return this.webusbService.sendToDevice(target.index, [IN_COMPUTER_START_CALIBRATION, bumperId]).pipe(map(r => r.status === 'ok'));
   }
 
   changeTolerance(target: Target, bumperId: number, tolerance: number) {
-    return this.webSerialService.send(target.connection, [IN_COMPUTER_CHANGE_TOLERANCE, bumperId, tolerance]);
+    return this.webusbService.sendToDevice(target.index, [IN_COMPUTER_CHANGE_TOLERANCE, bumperId, tolerance]).pipe(map(r => r.status === 'ok'));
   }
 
   enableBumper(target: Target, bumperId: number) {
-    return this.webSerialService.send(target.connection, [IN_COMPUTER_ENABLE_BUMPER, bumperId]);
+    return this.webusbService.sendToDevice(target.index, [IN_COMPUTER_ENABLE_BUMPER, bumperId]).pipe(map(r => r.status === 'ok'));
   }
 
-  enableBumpers(target: Target) {
-    return this.webSerialService.send(target.connection, [IN_COMPUTER_ENABLE_BUMPERS]);
+  private enableBumpers(target: Target) {
+    return this.webusbService.sendToDevice(target.index, [IN_COMPUTER_ENABLE_BUMPERS]).pipe(map(r => r.status === 'ok'));
   }
 
   disableBumper(target: Target, bumperId: number) {
-    return this.webSerialService.send(target.connection, [IN_COMPUTER_DISABLE_BUMPER, bumperId]);
+    return this.webusbService.sendToDevice(target.index, [IN_COMPUTER_DISABLE_BUMPER, bumperId]).pipe(map(r => r.status === 'ok'));
   }
 
   disableBumperAndBlink(target: Target, bumperId: number) {
-    return this.webSerialService.send(target.connection, [IN_COMPUTER_DISABLE_BUMPER_AND_BLINK, bumperId]);
+    return this.webusbService.sendToDevice(target.index, [IN_COMPUTER_DISABLE_BUMPER_AND_BLINK, bumperId]).pipe(map(r => r.status === 'ok'));
   }
 
   disableBumpersAndBlink(target: Target) {
-    return this.webSerialService.send(target.connection, [IN_COMPUTER_DISABLE_BUMPERS_AND_BLINK]);
+    return this.webusbService.sendToDevice(target.index, [IN_COMPUTER_DISABLE_BUMPERS_AND_BLINK]).pipe(map(r => r.status === 'ok'));
   }
 
   getState(target: Target): Observable<boolean> {
-    return this.webSerialService.send(target.connection, [IN_COMPUTER_GET_STATE]);
+    return this.webusbService.sendToDevice(target.index, [IN_COMPUTER_GET_STATE]).pipe(map(r => r.status === 'ok'));
   }
 
   readInboundMessages(target: Target): Observable<TargetInboundMessage> {
-    if (!target.connection) {
+    if (!target.claimed) {
       throw 'Target needs to be claimed before being able to listen';
     }
-    return target.connection.readSubject.pipe(
-      map(msg => {
-        console.log("Message!");
-        const code = msg[0] || -1;
-        let state = undefined;
-        switch (code) {
-          case OUT_COMPUTER_CONNECTED:
-          case OUT_COMPUTER_CALIBRATION_FINISHED:
-          case OUT_COMPUTER_BUMPER_HIT:
-          case OUT_COMPUTER_CONTROLLER_STATE:
-            state = readState(new DataView(msg));
-            break;
-        }
-        return {
-          code: code,
-          state: state
-        };
-      })
-    );
+    return this.webusbService.listen(target.device)
+        .pipe(map(msg => {
+          console.log("Message!");
+          const code = msg.data?.getUint8(0) || -1;
+          let state = undefined;
+          switch (code) {
+            case OUT_COMPUTER_CONNECTED:
+            case OUT_COMPUTER_CALIBRATION_FINISHED:
+            case OUT_COMPUTER_BUMPER_HIT:
+            case OUT_COMPUTER_CONTROLLER_STATE:
+              state = readState(msg.data);
+              break;
+          }
+          return {
+            code: code,
+            state: state
+          };
+        }));
   }
 
-
-  selectPort(): Observable<Target> {
-    return this.webSerialService
-      .requestPort()
-      .pipe(map(serialConnectionToTarget));
-  }
+  selectDevices(){
+  this.webusbService.configureNewDevices().then();
+    }
 
   sendMessage(message: TargetOutboundMessage, target: Target): Observable<boolean> {
-    console.log("🚀 ~ file: targets.service.ts:129 ~ TargetsService ~ sendMessage ~ message:", message)
     switch (message.code) {
       case IN_COMPUTER_CONNECTED:
         return this.connect(target);
@@ -139,7 +136,7 @@ export class TargetsService {
       case IN_COMPUTER_ENABLE_BUMPERS:
         return this.enableBumpers(target);
       case IN_COMPUTER_DISABLE_BUMPER:
-        return this.disableBumper(target, message.bumperId!);
+          return this.disableBumper(target, message.bumperId!);
       case IN_COMPUTER_DISABLE_BUMPER_AND_BLINK:
         return this.disableBumperAndBlink(target, message.bumperId!);
       case IN_COMPUTER_DISABLE_BUMPERS_AND_BLINK:
@@ -153,11 +150,3 @@ export class TargetsService {
     return of(false);
   }
 }
-const serialConnectionToTarget = (serialConnection: SerialConnection): Target => {
-  return {
-    index: serialConnection.index,
-    name: Object.values(serialConnection.port.getInfo()).join(" - ") || '',
-    connection: serialConnection,
-    state: []
-  };
-};

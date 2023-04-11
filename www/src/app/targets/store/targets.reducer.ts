@@ -1,30 +1,24 @@
-import { Target } from '../models/target.model';
 import { TargetsActions, TargetsActionTypes } from './targets.actions';
 import { targetsInitialState, TargetsState } from './targets.state';
+import {Target} from '../models/target.model';
 
 const MESSAGE_LOG_MAX_SIZE = 1000;
 
 export function targetsReducer(state = targetsInitialState, action: TargetsActions): TargetsState {
   switch (action.type) {
 
-    case TargetsActionTypes.TARGET_ESTABLISH_CONNECTION: {
+    case TargetsActionTypes.TARGETS_QUERY: {
       return Object.assign({}, state, {
         loading: true,
       });
     }
 
-    case TargetsActionTypes.TARGET_CONNECTION_SUCCESS: {
+    case TargetsActionTypes.TARGETS_LOADED: {
       return Object.assign({}, state, {
+        targets: action.payload.targets,
         loading: false,
-        targets: [...state.targets, action.payload.target]
       });
     }
-
-    // case TargetsActionTypes.TARGETS_REFRESH: {
-    //   return Object.assign({}, state, {
-    //     loading: true,
-    //   });
-    // }
 
     case TargetsActionTypes.TARGET_INBOUND_MESSAGE_RECEIVED: {
       let messageLog = [...state.messageLog];
@@ -32,11 +26,10 @@ export function targetsReducer(state = targetsInitialState, action: TargetsActio
         messageLog.shift();
       }
       messageLog.push(action.payload.message);
-      console.log("🚀 ~ file: targets.reducer.ts:35 ~ targetsReducer ~ message:", action.payload.message)
       let targets: Target[] = [];
       state.targets.forEach((s, i) => {
-        if (action.payload.target.index === i && action.payload.message.state) {
-          let t = Object.assign({}, s, { state: action.payload.message.state, connected: true });
+        if (action.payload.targetIndex === i && action.payload.message.state) {
+          let t = Object.assign({}, s, {state: action.payload.message.state, connected: true});
           // Specificity for computer connected
           targets.push(t);
         } else {

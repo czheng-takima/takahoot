@@ -1,28 +1,46 @@
-import { Action } from '@ngrx/store';
-import { TargetInboundMessage } from '../models/target-inbound-message.model';
-import { TargetOutboundMessage } from '../models/target-outbound-message.model';
-import { Target } from '../models/target.model';
+import {Action} from '@ngrx/store';
+import {Target} from '../models/target.model';
+import {TargetInboundMessage} from '../models/target-inbound-message.model';
+import {TargetOutboundMessage} from '../models/target-outbound-message.model';
 
 export enum TargetsActionTypes {
-  TARGET_ESTABLISH_CONNECTION = '[Targets] Establish connection',
-  TARGET_CONNECTION_SUCCESS = '[Targets] Establish connection success',
-  TARGETS_ERROR = '[Targets] Targets error',
+  TARGETS_QUERY = '[Targets] Targets query',
+  TARGETS_LOADED = '[Targets] Targets loaded',
+
+  TARGET_CLAIM = '[Targets] Claiming target',
+  TARGET_UNCLAIM = '[Targets] Target unclaimed',
+
   TARGET_SEND_MESSAGE = '[Targets] Sending message',
-  TARGET_INBOUND_MESSAGE_RECEIVED = '[Targets] Target inbound message received',
-  TARGETS_REFRESH = '[Targets] Refresh targets'
+  TARGETS_ERROR = '[Targets] Targets error',
+
+  TARGET_INBOUND_MESSAGE_RECEIVED = '[Targets] Target inbound message received'
 }
 
-export class TargetEstablishConnection implements Action {
-  readonly type = TargetsActionTypes.TARGET_ESTABLISH_CONNECTION;
+export class TargetsRefresh implements Action {
+  readonly type = TargetsActionTypes.TARGETS_QUERY;
 }
 
-export class TargetEstablishConnectionSuccess implements Action {
-  readonly type = TargetsActionTypes.TARGET_CONNECTION_SUCCESS;
-  constructor(public payload: {
-    target: Target
-  }) {
+export class TargetsLoaded implements Action {
+  readonly type = TargetsActionTypes.TARGETS_LOADED;
+
+  constructor(public payload: { targets: Target[] }) {
   }
 }
+
+export class TargetClaim implements Action {
+  readonly type = TargetsActionTypes.TARGET_CLAIM;
+
+  constructor(public payload: { target: Target }) {
+  }
+}
+
+export class TargetUnclaim implements Action {
+  readonly type = TargetsActionTypes.TARGET_UNCLAIM;
+
+  constructor(public payload: { target: Target }) {
+  }
+}
+
 
 export class TargetSendMessage implements Action {
   readonly type = TargetsActionTypes.TARGET_SEND_MESSAGE;
@@ -35,24 +53,23 @@ export class TargetSendMessage implements Action {
 
 export class TargetsError implements Action {
   readonly type = TargetsActionTypes.TARGETS_ERROR;
+
   constructor(public payload: { error: any }) {
   }
 }
 
 export class TargetInboundMessageReceived implements Action {
   readonly type = TargetsActionTypes.TARGET_INBOUND_MESSAGE_RECEIVED;
-  constructor(public payload: { target: Target, message: TargetInboundMessage }) {
+
+  constructor(public payload: { targetIndex: number, message: TargetInboundMessage }) {
   }
 }
 
-export class TargetsRefresh implements Action {
-  readonly type = TargetsActionTypes.TARGETS_REFRESH;
-}
-
 export type TargetsActions =
-  TargetEstablishConnection
-  | TargetEstablishConnectionSuccess
-  | TargetsError
-  | TargetSendMessage
-  | TargetInboundMessageReceived
-  | TargetsRefresh;
+    | TargetsRefresh
+    | TargetsLoaded
+    | TargetClaim
+    | TargetUnclaim
+    | TargetSendMessage
+    | TargetsError
+    | TargetInboundMessageReceived;

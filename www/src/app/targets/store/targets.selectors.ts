@@ -1,4 +1,4 @@
-import { createFeatureSelector, createSelector } from '@ngrx/store';
+import { createSelector, createFeatureSelector } from '@ngrx/store';
 import { TargetsState } from './targets.state';
 
 export const getTargetsState = createFeatureSelector<TargetsState>('targets');

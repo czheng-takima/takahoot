@@ -1,10 +1,13 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
-import { select, Store } from '@ngrx/store';
-import { MDBModalRef } from 'angular-bootstrap-md';
-import { Observable, Subscription } from 'rxjs';
-import { map } from 'rxjs/operators';
-import { WebSerialService } from 'src/app/shared/services/webserial.service';
-import { AppState } from '../../reducers/index';
+import {Component, OnDestroy, OnInit} from '@angular/core';
+import {MDBModalRef} from 'angular-bootstrap-md';
+import {Target} from '../models/target.model';
+import {AppState} from '../../reducers/index';
+import {select, Store} from '@ngrx/store';
+import * as fromTargets from './../store/targets.actions';
+import {Observable, Subscription} from 'rxjs';
+import {getAllLoaded, getTargets} from '../store/targets.selectors';
+import {map} from 'rxjs/operators';
+import {TargetsService} from '../services/targets.service';
 import {
   IN_COMPUTER_CONNECTED,
   IN_COMPUTER_DISABLE_BUMPERS_AND_BLINK,
@@ -14,10 +17,6 @@ import {
   IN_COMPUTER_RESET,
   IN_COMPUTER_START_CALIBRATION
 } from '../models/target-outbound-message.model';
-import { Target } from '../models/target.model';
-import { TargetsService } from '../services/targets.service';
-import { getAllLoaded, getTargets } from '../store/targets.selectors';
-import * as fromTargets from './../store/targets.actions';
 
 @Component({
   selector: 'app-targets',
@@ -38,40 +37,22 @@ export class TargetsComponent implements OnInit, OnDestroy {
     class: 'modal-dialog-centered'
   };
 
-  constructor(private store: Store<AppState>, private targetsService: TargetsService, private webSerialService: WebSerialService) {
+  constructor(private store: Store<AppState>, private targetsService: TargetsService) {
   }
 
   ngOnInit() {
     this.isLoading$ = this.store.select(getAllLoaded);
     this.targets$ = this.store.pipe(
-      select(getTargets),
-      map((targets: Target[]) => {
-        if (!targets || targets.length === 0) {
-          this.store.dispatch(new fromTargets.TargetsRefresh());
-        }
-        this.updateSubscriptions(targets);
-        this.targets = targets;
-        return targets;
-      })
+        select(getTargets),
+        map((targets: Target[]) => {
+          if (!targets || targets.length === 0) {
+            this.store.dispatch(new fromTargets.TargetsRefresh());
+          }
+          this.updateSubscriptions(targets);
+          this.targets = targets;
+          return targets;
+        })
     );
-  }
-
-  async testButton() {
-    // const target = await this.targetsService.selectPort().toPromise();
-    this.store.dispatch(new fromTargets.TargetEstablishConnection());
-    const sameTarget = (await this.store.select(getTargets).toPromise())[0];
-    console.log("🚀 ~ file: targets.component.ts:62 ~ TargetsComponent ~ testButton ~ sameTarget:", sameTarget)
-    // this.targetsService.connect(target);
-  }
-
-  testButton2() {
-    console.log("test button 2");
-    this.store.select(getTargets).subscribe(targets => {
-      console.log("🚀 ~ file: targets.component.ts:70 ~ TargetsComponent ~ testButton2 ~ t:", targets)
-      this.webSerialService.send(targets[0].connection, [IN_COMPUTER_ENABLE_BUMPERS]);
-    });
-    // this.targetsService.enableBumpers(t);
-    // this.store.dispatch(new fromTargets.TargetSendMessage({ message: { code: IN_COMPUTER_ENABLE_BUMPERS }, target: t }));
   }
 
   private updateSubscriptions(targets: Target[]) {
@@ -82,15 +63,15 @@ export class TargetsComponent implements OnInit, OnDestroy {
     }
     for (let t of targets) {
       let sub = this.targetSubscriptions.find(s => s.index === t.index);
-      if (!sub && t.connection) {
+      if (!sub && t.claimed) {
         let subscription = this.targetsService.readInboundMessages(t).subscribe(tim => {
           console.log(tim);
-          this.store.dispatch(new fromTargets.TargetInboundMessageReceived({ target: t, message: tim }));
+          this.store.dispatch(new fromTargets.TargetInboundMessageReceived({targetIndex: t.index, message: tim}));
         });
-        this.targetSubscriptions.push({ index: t.index, subscription: subscription, timeout: undefined });
+        this.targetSubscriptions.push({index: t.index, subscription: subscription, timeout: undefined});
         this.onConnect(t);
         this.refreshStateEverySecond(t);
-      } else if (sub && !t.connection) {
+      } else if (sub && !t.claimed) {
         sub.subscription.unsubscribe();
         clearInterval(sub.timeout);
         this.targetSubscriptions.splice(this.targetSubscriptions.indexOf(sub), 1);
@@ -99,21 +80,21 @@ export class TargetsComponent implements OnInit, OnDestroy {
   }
 
   onConnect(target: Target) {
-    this.store.dispatch(new fromTargets.TargetSendMessage({ message: { code: IN_COMPUTER_CONNECTED }, target }));
+    this.store.dispatch(new fromTargets.TargetSendMessage({message: {code: IN_COMPUTER_CONNECTED}, target}));
   }
 
   onRefreshState(target: Target) {
-    this.store.dispatch(new fromTargets.TargetSendMessage({ message: { code: IN_COMPUTER_GET_STATE }, target }));
+    this.store.dispatch(new fromTargets.TargetSendMessage({message: {code: IN_COMPUTER_GET_STATE}, target}));
   }
 
   onReset(target: Target) {
-    this.store.dispatch(new fromTargets.TargetSendMessage({ message: { code: IN_COMPUTER_RESET }, target }));
+    this.store.dispatch(new fromTargets.TargetSendMessage({message: {code: IN_COMPUTER_RESET}, target}));
   }
 
   onCalibrate(target: Target) {
     for (let b of target.state) {
       if (b.connected) {
-        this.store.dispatch(new fromTargets.TargetSendMessage({ message: { code: IN_COMPUTER_START_CALIBRATION, bumperId: b.id }, target }));
+        this.store.dispatch(new fromTargets.TargetSendMessage({message: {code: IN_COMPUTER_START_CALIBRATION, bumperId: b.id}, target}));
       }
     }
   }
@@ -121,13 +102,13 @@ export class TargetsComponent implements OnInit, OnDestroy {
   onEnableBumpers(target: Target) {
     for (let b of target.state) {
       if (b.connected) {
-        this.store.dispatch(new fromTargets.TargetSendMessage({ message: { code: IN_COMPUTER_ENABLE_BUMPER, bumperId: b.id }, target }));
+        this.store.dispatch(new fromTargets.TargetSendMessage({message: {code: IN_COMPUTER_ENABLE_BUMPER, bumperId: b.id}, target}));
       }
     }
   }
 
   onDisableBumpers(target: Target) {
-    this.store.dispatch(new fromTargets.TargetSendMessage({ message: { code: IN_COMPUTER_DISABLE_BUMPERS_AND_BLINK }, target }));
+    this.store.dispatch(new fromTargets.TargetSendMessage({message: {code: IN_COMPUTER_DISABLE_BUMPERS_AND_BLINK}, target}));
   }
 
   ngOnDestroy() {
@@ -137,19 +118,23 @@ export class TargetsComponent implements OnInit, OnDestroy {
 
 
   claimAll() {
-
+    if (this.targets) {
+      this.targets.forEach(t => {
+        this.store.dispatch(new fromTargets.TargetClaim({target: t}));
+      });
+    }
   }
 
   private refreshStateEverySecond(t: Target) {
     this.targetSubscriptions[t.index].timeout = setInterval(() => this.store.dispatch(new fromTargets.TargetSendMessage({
-      message: { code: IN_COMPUTER_GET_STATE },
+      message: {code: IN_COMPUTER_GET_STATE},
       target: t
-    })), 10000);
+    })), 1000);
   }
 
   unclaimAll() {
-    console.log("this function should be implemented sorry");
-    //todo implement
+      console.log("this function should be implemented sorry");
+      //todo implement
   }
 
   setAutoReset(ar: boolean) {
@@ -163,7 +148,7 @@ export class TargetsComponent implements OnInit, OnDestroy {
           // Dispatch reset 3 seconds after
           this.autoResetInProgress = true;
           setTimeout(() => {
-            this.store.dispatch(new fromTargets.TargetSendMessage({ message: { code: IN_COMPUTER_ENABLE_BUMPERS }, target: t }));
+            this.store.dispatch(new fromTargets.TargetSendMessage({message: {code: IN_COMPUTER_ENABLE_BUMPERS}, target: t}));
             setTimeout(() => {
               this.autoResetInProgress = false;
             }, 1000);
@@ -177,8 +162,7 @@ export class TargetsComponent implements OnInit, OnDestroy {
 
   }
 
-  selectPort() {
-    const target$ = this.targetsService.selectPort();
-    target$.subscribe(console.log);
+  selectDevices(){
+    this.targetsService.selectDevices();
   }
 }

@@ -27,7 +27,6 @@
     "@types/chart.js": "^2.9.15",
     "@types/md5": "^2.1.33",
     "@types/w3c-web-usb": "^1.0.4",
-    "@venixthedev/kahootjs": "^2.4.1",
     "angular-bootstrap-md": "^8.10.1",
     "chart.js": "^2.7.2",
     "core-js": "^3.6.4",
@@ -50,10 +49,7 @@
     "@types/jasmine": "^3.5.7",
     "@types/jasminewd2": "^2.0.8",
     "@types/node": "^13.7.7",
-    "@types/w3c-web-serial": "^1.0.3",
     "codelyzer": "^5.2.1",
-    "eslint": "^6.8.0",
-    "i": "^0.3.7",
     "jasmine-core": "^3.5.0",
     "jasmine-spec-reporter": "~4.2.1",
     "karma": "^4.1.0",
@@ -61,9 +57,9 @@
     "karma-coverage-istanbul-reporter": "^2.1.1",
     "karma-jasmine": "^3.1.1",
     "karma-jasmine-html-reporter": "^1.5.2",
-    "npm": "^9.5.0",
     "protractor": "^6.0.0",
     "ts-node": "^8.6.2",
+    "eslint": "^6.8.0",
     "typescript": "3.7.5"
   }
 }
