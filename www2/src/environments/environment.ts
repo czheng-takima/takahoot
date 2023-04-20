@@ -2,7 +2,7 @@ export const environment = {
   serverUrl: 'http://127.0.0.1:3000/kahoot',
   firebase: {
     projectId: 'takima-takahoot',
-    appId: '1:948003460395:web:46df1d0fc045acef34e16e',
+    appId: '@{APP_ID}',
     databaseURL: 'https://takima-takahoot.firebaseio.com',
     storageBucket: 'takima-takahoot.appspot.com',
     apiKey: 'AIzaSyAx0cIDJD8oC-E_XbIPj_ewau9EChSvBzs',

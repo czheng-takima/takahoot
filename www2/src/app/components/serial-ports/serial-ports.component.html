@@ -1,52 +1,91 @@
-<table mat-table [dataSource]="dataSource" class="mat-elevation-z8">
-
-    <!--- Note that these columns can be defined in any order.
+<table mat-table [dataSource]="dataSource$ | async" class="mat-elevation-z8">
+  <!--- Note that these columns can be defined in any order.
           The actual rendered columns are set as a property on the row definition" -->
 
-    <ng-container matColumnDef="index">
-        <th mat-header-cell *matHeaderCellDef> No. </th>
-        <td mat-cell *matCellDef="let data"> {{ data.index }} </td>
-    </ng-container>
+  <ng-container matColumnDef="index">
+    <th mat-header-cell *matHeaderCellDef>No.</th>
+    <td mat-cell *matCellDef="let data">{{ data.index }}</td>
+  </ng-container>
 
-    <ng-container matColumnDef="port">
-        <th mat-header-cell *matHeaderCellDef> Port </th>
-        <td mat-cell *matCellDef="let data"> {{ data.port }} </td>
-    </ng-container>
+  <ng-container matColumnDef="port">
+    <th mat-header-cell *matHeaderCellDef>Port</th>
+    <td mat-cell *matCellDef="let data">{{ data.port }}</td>
+  </ng-container>
 
-    <ng-container matColumnDef="target">
-        <th mat-header-cell *matHeaderCellDef>Target</th>
-        <td mat-cell *matCellDef="let data">
-            <mat-form-field subscriptSizing="dynamic">
-                <mat-select [(ngModel)]="data.target$" (selectionChange)="onTargetSelected(data, $event.value)">
-                    <mat-option *ngFor="let target$ of targets$" [value]="target$">
-                        {{ (target$ | async)?.name || 'No name' }}
-                    </mat-option>
-                </mat-select>
-            </mat-form-field>
-        </td>
-    </ng-container>
+  <ng-container matColumnDef="target">
+    <th mat-header-cell *matHeaderCellDef>Target</th>
+    <td mat-cell *matCellDef="let data">
+      <mat-form-field subscriptSizing="dynamic">
+        <mat-select
+          [(ngModel)]="data.target$"
+          (selectionChange)="onTargetSelected(data, $event.value)"
+        >
+          <mat-option *ngFor="let target$ of targets$" [value]="target$">
+            {{ (target$ | async)?.name || "No name" }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+    </td>
+  </ng-container>
 
-    <ng-container matColumnDef="actions">
-        <th mat-header-cell *matHeaderCellDef>Actions</th>
-        <td mat-cell *matCellDef="let data">
-            <div fxLayout="row" fxLayoutAlign="space-between center" *ngIf="(data.target$ | async) as target">
-                <button [disabled]="!target" mat-stroked-button color="warn" (click)="reset(target)">Reset</button>
-                <button [disabled]="!target" mat-stroked-button color="" (click)="getState(target)">Get state</button>
-                <button [disabled]="!target" mat-raised-button color="primary"
-                    (click)="activate(target)">Activate</button>
-                <button [disabled]="!target" mat-raised-button color="accent"
-                    (click)="deactivate(target)">Deactivate</button>
+  <ng-container matColumnDef="actions">
+    <th mat-header-cell *matHeaderCellDef>Actions</th>
+    <td mat-cell *matCellDef="let data">
+      <div
+        fxLayout="row"
+        fxLayoutAlign="space-between center"
+        *ngIf="data.target$ | async as target"
+      >
+        <button
+          [disabled]="!target"
+          mat-stroked-button
+          color="warn"
+          (click)="reset(target)"
+        >
+          Reset
+        </button>
+        <button
+          [disabled]="!target"
+          mat-stroked-button
+          color=""
+          (click)="getState(target)"
+        >
+          Get state
+        </button>
+        <button
+          [disabled]="!target"
+          mat-raised-button
+          color="primary"
+          (click)="activate(target)"
+        >
+          Activate
+        </button>
+        <button
+          [disabled]="!target"
+          mat-raised-button
+          color="accent"
+          (click)="deactivate(target)"
+        >
+          Deactivate
+        </button>
+      </div>
+    </td>
+  </ng-container>
 
-            </div>
-        </td>
-    </ng-container>
-
-    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-    <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+  <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+  <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
 </table>
 
 <div>
-    <button style="margin: 16px 0" mat-raised-button (click)="addPort()">Add Port</button>
-    <button style="margin: 16px 0; float:right" mat-raised-button color="warn"
-        (click)="disconnect()">Reset all</button>
+  <button style="margin: 16px 0" mat-raised-button (click)="addPort()">
+    Add Port
+  </button>
+  <button
+    style="margin: 16px 0; float: right"
+    mat-raised-button
+    color="warn"
+    (click)="disconnect()"
+  >
+    Reset all
+  </button>
 </div>

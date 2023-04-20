@@ -1,78 +1,67 @@
 :host {
-    .card {
-        padding: 16px;
+  .card {
+    padding: 16px;
+  }
+
+  .answer-section {
+    width: max(100%, 100px);
+    margin-top: 16px;
+    margin-bottom: 16px;
+  }
+
+  .buttons-section {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: space-evenly;
+    align-items: stretch;
+    align-content: space-between;
+
+    button {
+      margin: 8px;
     }
+  }
 
-    .header-section {}
+  .grid {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
 
-    .answer-section {
-        width: max(100%, 100px);
-        margin-top: 16px;
-        margin-bottom: 16px;
-    }
+    .tile {
+      flex-basis: calc(50% - 64px);
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
+      align-items: center;
+      margin: 16px;
 
-    .buttons-section {
-        display: flex;
-        flex-direction: row;
-        flex-wrap: wrap;
-        justify-content: space-evenly;
-        align-items: stretch;
-        align-content: space-between;
-
-        button {
-            margin: 8px;
-        }
-    }
-
-    .logs-section {}
-
-    .tolerance-section {
+      button {
+        font-size: xx-large;
         width: 100%;
+        height: 100%;
+        margin-bottom: 80%;
+        transform: translateY(40%);
+      }
     }
+  }
 
-    .grid {
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: center;
+  .mat-red {
+    background: #e21b3c;
+    color: #fff;
+  }
 
-        .tile {
+  .mat-blue {
+    background: #1368ce;
+    color: #fff;
+  }
 
-            flex-basis: calc(50% - 64px);
-            display: flex;
-            flex-direction: row;
-            justify-content: space-between;
-            align-items: center;
-            margin: 16px;
+  .mat-yellow {
+    background: #d09f36;
+    color: #fff;
+  }
 
-            button {
-                font-size: xx-large;
-                width: 100%;
-                height: 100%;
-                margin-bottom: 80%;
-                transform: translateY(40%);
-            }
-
-        }
-    }
-
-    .mat-red {
-        background: #E21B3C;
-        color: #fff;
-    }
-
-    .mat-blue {
-        background: #1368CE;
-        color: #fff;
-    }
-
-    .mat-yellow {
-        background: #D09F36;
-        color: #fff;
-    }
-
-    .mat-green {
-        background: #26890C;
-        color: #fff;
-    }
-
+  .mat-green {
+    background: #26890c;
+    color: #fff;
+  }
 }

@@ -1,5 +1,13 @@
-import { Component, Input, OnInit } from '@angular/core';
-import { BehaviorSubject, ReplaySubject } from 'rxjs';
+import {
+  Component,
+  Input,
+  OnChanges,
+  OnDestroy,
+  OnInit,
+  SimpleChanges,
+} from '@angular/core';
+import { AssertionError } from 'assert';
+import { BehaviorSubject, ReplaySubject, Subscription } from 'rxjs';
 import { Bumper } from 'src/app/models/bumper.model';
 import { Target } from 'src/app/models/target.model';
 import { TargetsService } from 'src/app/services/targets.service';
@@ -7,26 +15,41 @@ import { TargetsService } from 'src/app/services/targets.service';
 @Component({
   selector: 'app-tolerance',
   templateUrl: './tolerance.component.html',
-  styleUrls: ['./tolerance.component.scss']
+  styleUrls: ['./tolerance.component.scss'],
 })
-export class ToleranceComponent implements OnInit {
-  @Input() target$?: BehaviorSubject<Target>;
+export class ToleranceComponent implements OnInit, OnChanges, OnDestroy {
+  @Input() target?: Target;
+
   state$?: ReplaySubject<Bumper[]>;
 
   tolerances: number[] = [0, 0, 0, 0];
-  target?: Target;
+  private subs: Subscription[] = [];
 
-  constructor(private targetService: TargetsService) { }
+  constructor(private targetService: TargetsService) {}
 
-  ngOnInit(): void {
-    this.target$?.subscribe((target: Target) => {
-      this.target = target;
-      this.state$ = target.state$;
-      this.state$.subscribe((state: Bumper[]) => {
-        const t = state.map((bumper: Bumper) => bumper.tolerance || 0);
-        this.tolerances = t;
-      });
-    });
+  ngOnDestroy(): void {
+    this.subs.forEach((s) => s.unsubscribe());
+  }
+
+  ngOnInit(): void {}
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['target'] && !changes['target'].currentValue) {
+      throw new AssertionError();
+    }
+    if (changes['target']?.currentValue) {
+      this.subs.forEach((s) => s.unsubscribe());
+      this.target = changes['target'].currentValue;
+      this.state$ = this.target!.state$;
+      this.subs = [
+        this.state$.subscribe(
+          (state: Bumper[]) =>
+            (this.tolerances = state.map(
+              (bumper: Bumper) => bumper.tolerance || 0
+            ))
+        ),
+      ];
+    }
   }
 
   toleranceChange(newTolerance: number, index: number) {
@@ -34,7 +57,7 @@ export class ToleranceComponent implements OnInit {
   }
 
   submitTolerances() {
-    this.tolerances.forEach((tolerance: number, index: number) => {
+    this.tolerances.forEach((tolerance, index) => {
       this.targetService.changeTolerance(this.target!, index, tolerance);
     });
     this.targetService.getState(this.target!);

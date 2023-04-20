@@ -6,23 +6,19 @@ https://docs.nestjs.com/providers#services
 import { Reference } from '@firebase/database-types';
 import { Injectable } from '@nestjs/common';
 import { FirebaseAdmin, InjectFirebaseAdmin } from './firebase';
+import { SessionState } from './SessionState';
 
-const Client = require('@venixthedev/kahootjs');
-
-export interface SessionState {
-  sessionKey: string;
-  gameState: 'disconnected' | 'lobby' | 'quiz' | 'results';
-  ongoingQuestion: number;
-  acceptingAnswers: boolean;
-}
+// const Client = require('@venixthedev/kahootjs');
+import * as Client from '@venixthedev/kahootjs';
 
 @Injectable()
 export class KahootService {
   Client = Client;
 
-  kahootClients: Map<string, typeof Client> = new Map();
+  readonly kahootClients: Map<string, typeof Client> = new Map();
   dbReference: Reference;
-  constructor(@InjectFirebaseAdmin() private readonly firebase: FirebaseAdmin) {
+
+  constructor(@InjectFirebaseAdmin() firebase: FirebaseAdmin) {
     const database = firebase.database;
     this.dbReference = database.ref(`/sessions`);
   }
@@ -41,16 +37,11 @@ export class KahootService {
       return Promise.reject();
     });
     const sessionKey = this.keyOf(sessionId, playerName);
-    this.setCallbacks(sessionKey, client);
+    this.setupCallbacks(sessionKey, client);
     this.kahootClients.set(sessionKey, client);
-    const sessionState: SessionState = {
-      sessionKey,
-      gameState: 'lobby',
-      ongoingQuestion: -2,
-      acceptingAnswers: false,
-    };
+    const sessionState = initNewSession(sessionKey);
     this.dbReference.child(sessionKey).set(sessionState);
-    return Promise.resolve(sessionState);
+    return sessionState;
   }
 
   async answerQuestion(
@@ -101,7 +92,7 @@ export class KahootService {
     return this.dbReference.child(sessionKey).update(changes);
   }
 
-  private setCallbacks(sessionKey: string, client: typeof Client) {
+  private setupCallbacks(sessionKey: string, client: typeof Client) {
     client.on('Joined', async () => {
       console.log('Joined session: ' + sessionKey);
       await this.updateSession(sessionKey, { gameState: 'lobby' });
@@ -165,4 +156,12 @@ export class KahootService {
     }
     return sessionState.gameState === 'quiz';
   }
+}
+function initNewSession(sessionKey: string): SessionState {
+  return {
+    sessionKey,
+    gameState: 'lobby',
+    ongoingQuestion: -2, // invalid question number
+    acceptingAnswers: false,
+  };
 }

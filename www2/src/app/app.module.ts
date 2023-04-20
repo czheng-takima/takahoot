@@ -5,7 +5,7 @@ import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { initializeApp, provideFirebaseApp } from '@angular/fire/app';
 import { getDatabase, provideDatabase } from '@angular/fire/database';
 import { FirestoreModule } from '@angular/fire/firestore';
-import { FlexLayoutModule } from "@angular/flex-layout";
+import { FlexLayoutModule } from '@angular/flex-layout';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
@@ -35,21 +35,39 @@ import { KahootEngineService } from './services/kahoot-engine.service';
 import { TargetsService } from './services/targets.service';
 import { WebSerialService } from './services/webserial.service';
 
-const materialModules = [
-  MatCardModule,
-  MatGridListModule,
-  MatButtonModule,
-  MatInputModule,
-  MatIconModule,
-  MatSelectModule,
-  MatTabsModule,
-  MatToolbarModule,
-  MatListModule,
-  MatCheckboxModule,
-  MatTableModule,
-  MatSliderModule,
-  MatSlideToggleModule,
-];
+@NgModule({
+  imports: [
+    MatCardModule,
+    MatGridListModule,
+    MatButtonModule,
+    MatInputModule,
+    MatIconModule,
+    MatSelectModule,
+    MatTabsModule,
+    MatToolbarModule,
+    MatListModule,
+    MatCheckboxModule,
+    MatTableModule,
+    MatSliderModule,
+    MatSlideToggleModule,
+  ],
+  exports: [
+    MatCardModule,
+    MatGridListModule,
+    MatButtonModule,
+    MatInputModule,
+    MatIconModule,
+    MatSelectModule,
+    MatTabsModule,
+    MatToolbarModule,
+    MatListModule,
+    MatCheckboxModule,
+    MatTableModule,
+    MatSliderModule,
+    MatSlideToggleModule,
+  ],
+})
+export class MaterialModules {}
 
 @NgModule({
   declarations: [
@@ -66,7 +84,7 @@ const materialModules = [
     BrowserModule,
     AppRoutingModule,
     BrowserAnimationsModule,
-    ...materialModules,
+    MaterialModules,
     HttpClientModule,
     FormsModule,
     FlexLayoutModule,
@@ -80,8 +98,8 @@ const materialModules = [
     TargetsService,
     WebSerialService,
     HttpClient,
-    { provide: 'Database', useFactory: getDatabase }
+    { provide: 'Database', useFactory: getDatabase },
   ],
-  bootstrap: [AppComponent]
+  bootstrap: [AppComponent],
 })
-export class AppModule { }
+export class AppModule {}

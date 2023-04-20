@@ -1,35 +1,63 @@
 <ng-container *ngIf="target$ | async as target">
   <mat-card *ngIf="target.connection" class="card mat-elevation-z4">
-    <div class="header-section">
-      <mat-card-title>{{target.name}}</mat-card-title>
-      <mat-card-subtitle>{{getDetails()}}</mat-card-subtitle>
+    <div>
+      <mat-card-title>{{ target.name }}</mat-card-title>
+      <mat-card-subtitle>{{ getDetails() }}</mat-card-subtitle>
     </div>
     <mat-card-content fxLayout="column" fxLayoutAlign="space-evenly center">
       <div class="answer-section mat-elevation-z1">
         <div class="grid">
           <div class="tile">
-            <button mat-raised-button color="red" (click)="onAnswer(QuizResponse.Triangle)">△</button>
+            <button
+              mat-raised-button
+              color="red"
+              (click)="onAnswer(QuizResponse.Triangle)"
+            >
+              △
+            </button>
           </div>
           <div class="tile">
-            <button mat-raised-button color="blue" (click)="onAnswer(QuizResponse.Diamond)">◊</button>
+            <button
+              mat-raised-button
+              color="blue"
+              (click)="onAnswer(QuizResponse.Diamond)"
+            >
+              ◊
+            </button>
           </div>
           <div class="tile">
-            <button mat-raised-button color="yellow" (click)="onAnswer(QuizResponse.Circle)">○</button>
+            <button
+              mat-raised-button
+              color="yellow"
+              (click)="onAnswer(QuizResponse.Circle)"
+            >
+              ○
+            </button>
           </div>
           <div class="tile">
-            <button mat-raised-button color="green" (click)="onAnswer(QuizResponse.Square)">□</button>
+            <button
+              mat-raised-button
+              color="green"
+              (click)="onAnswer(QuizResponse.Square)"
+            >
+              □
+            </button>
           </div>
         </div>
       </div>
       <div class="buttons-section">
-        <button class="mat-elevation-z1" mat-button (click)="joinGame()">Join Game</button>
-        <button class="mat-elevation-z1" mat-button (click)="initialize()">Initialize</button>
+        <button class="mat-elevation-z1" mat-button (click)="joinGame()">
+          Join Game
+        </button>
+        <button class="mat-elevation-z1" mat-button (click)="initialize()">
+          Initialize
+        </button>
       </div>
-      <div class="logs-section">
-        <app-target-logs ></app-target-logs>
+      <div>
+        <app-target-logs></app-target-logs>
       </div>
-      <div class="tolerance-section">
-        <app-tolerance [target$]="target$" ></app-tolerance>
+      <div class="w-100">
+        <app-tolerance [target]="target"></app-tolerance>
       </div>
     </mat-card-content>
   </mat-card>

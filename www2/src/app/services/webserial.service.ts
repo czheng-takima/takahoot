@@ -1,20 +1,29 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, of, ReplaySubject, Subject, throwError } from 'rxjs';
+import {
+  BehaviorSubject,
+  Observable,
+  of,
+  ReplaySubject,
+  Subject,
+  throwError,
+} from 'rxjs';
 import { SerialConnection } from '../models/serial-connection.model';
+import { WebSerialServiceMock } from './webserial.service.mock';
 
-const CARRIAGE_RETURN = 0x0D;
-const LINE_FEED = 0x0A;
+const CARRIAGE_RETURN = 0x0d;
+const LINE_FEED = 0x0a;
 
 const ARDUINO_VENDOR_ID = 0x2341;
 const ARDUINO_PRODUCT_ID = 0x8036;
 
-
-
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class WebSerialService {
-  private connections$: BehaviorSubject<SerialConnection[]> = new BehaviorSubject<SerialConnection[]>([]);
+  private readonly connectionsSubject: BehaviorSubject<SerialConnection[]> =
+    new BehaviorSubject<SerialConnection[]>([]);
+  readonly connections$: Observable<SerialConnection[]> =
+    this.connectionsSubject.asObservable();
   private connectionCount = 0;
 
   constructor() {
@@ -26,33 +35,34 @@ export class WebSerialService {
 
     const connections = alreadyConnectedPorts.map(async (port: SerialPort) => {
       const connection = await this.openPort(port)
-        .then(port => this.createConnection(port))
-        .then(connection => this.addConnection(connection));
+        .then((port) => this.createConnection(port))
+        .then((connection) => this.addConnection(connection));
       return connection;
     });
     return connections;
   }
 
   requestPort(): Promise<SerialConnection> {
-    if (!("serial" in navigator)) {
-      console.error("The Web Serial API is not supported.");
-      throwError("Web Serial API not supported");
+    if (!('serial' in navigator)) {
+      console.error('The Web Serial API is not supported.');
+      throwError(() => new Error('Web Serial API not supported'));
     }
     const filters: SerialPortFilter = {
       usbProductId: ARDUINO_PRODUCT_ID,
-      usbVendorId: ARDUINO_VENDOR_ID
+      usbVendorId: ARDUINO_VENDOR_ID,
     };
-    const serialConnection = navigator.serial.requestPort({ filters: [filters] })
-      .then(port => this.openPort(port))
-      .then(port => this.createConnection(port))
-      .then(connection => this.addConnection(connection));
+    const serialConnection = navigator.serial
+      .requestPort({ filters: [filters] })
+      .then((port) => this.openPort(port))
+      .then((port) => this.createConnection(port))
+      .then((connection) => this.addConnection(connection));
     return serialConnection;
   }
 
   private addConnection(connection: SerialConnection) {
-    const currentConnections = this.connections$.getValue();
+    const currentConnections = this.connectionsSubject.getValue();
     currentConnections.push(connection);
-    this.connections$.next(currentConnections);
+    this.connectionsSubject.next(currentConnections);
     return connection;
   }
 
@@ -62,7 +72,6 @@ export class WebSerialService {
   }
 
   private createConnection(port: SerialPort) {
-
     const infos = port.getInfo();
 
     if (!port || !port.readable) {
@@ -87,7 +96,9 @@ export class WebSerialService {
     return connection;
   }
 
-  private createSerialPortReadSubject(reader: ReadableStreamDefaultReader): Subject<Uint8Array> {
+  private createSerialPortReadSubject(
+    reader: ReadableStreamDefaultReader
+  ): Subject<Uint8Array> {
     const subject = new Subject<Uint8Array>();
 
     const read = async () => {
@@ -103,7 +114,8 @@ export class WebSerialService {
         reader.cancel();
         reader.releaseLock();
       },
-      error: err => console.error('Error while reading data from serial port:', err)
+      error: (err) =>
+        console.error('Error while reading data from serial port:', err),
     });
 
     read();
@@ -111,7 +123,9 @@ export class WebSerialService {
     return subject;
   }
 
-  private createSerialPortWriteSubject(writer: WritableStreamDefaultWriter): Subject<Uint8Array> {
+  private createSerialPortWriteSubject(
+    writer: WritableStreamDefaultWriter
+  ): Subject<Uint8Array> {
     const subject = new Subject<Uint8Array>();
 
     const write = async (data: Uint8Array) => {
@@ -124,7 +138,8 @@ export class WebSerialService {
         writer.close();
         writer.releaseLock();
       },
-      error: err => console.error('Error while writing data to serial port:', err)
+      error: (err) =>
+        console.error('Error while writing data to serial port:', err),
     });
 
     return subject;
@@ -139,104 +154,41 @@ export class WebSerialService {
       } catch (error) {
         console.error('Error while closing serial port:', error);
       }
-      const index = this.connections$.getValue().indexOf(connection);
+      const index = this.connectionsSubject.getValue().indexOf(connection);
       if (index !== -1) {
-        this.connections$.getValue().splice(index, 1);
+        this.connectionsSubject.getValue().splice(index, 1);
       }
     }
     console.log(`Disconnected port ${connection.index}`);
     return of(true);
   }
 
-  send(connection: SerialConnection, message: number[]) {
-    connection.writeSubject.next(new Uint8Array([...message, CARRIAGE_RETURN, LINE_FEED]));
+  async disconnect() {
+    const connections = this.connectionsSubject.getValue();
+    for (let c of connections) {
+      await this.disconnectPort(c);
+    }
+
+    this.connectionsSubject.next([]);
+  }
+
+  sendMessage(connection: SerialConnection, message: number[]) {
+    connection.writeSubject.next(
+      new Uint8Array([...message, CARRIAGE_RETURN, LINE_FEED])
+    );
     return of(true);
   }
 
-  getConnections(): BehaviorSubject<SerialConnection[]> {
+  /**
+   *
+   * @returns @deprecated use connections$ instead
+   */
+  getConnections(): Observable<SerialConnection[]> {
     return this.connections$;
-  }
-
-  getMockConnections(): BehaviorSubject<SerialConnection[]> {
-    const mockConnection1: SerialConnection = {
-      port: {
-        getSignals: () => { return Promise.resolve({ dataCarrierDetect: true, clearToSend: true, ringIndicator: true, dataSetReady: true }); },
-        getInfo: () => { return { usbProductId: 0x8036, usbVendorId: 0x2341, usbManufacturerName: "Arduino (www.arduino.cc)", usbProductName: "Arduino Micro" } },
-        open: () => { return Promise.resolve() },
-        close: () => { return Promise.resolve() },
-        setSignals: () => { return Promise.resolve() },
-        readable: {
-          getReader: (): ReadableStreamDefaultReader => {
-            return {
-              read: () => {
-              },
-              releaseLock: () => { },
-              cancel: () => { },
-              closed: () => { }
-            } as any as ReadableStreamDefaultReader
-          }
-        } as ReadableStream,
-        writable: null
-      } as any as SerialPort,
-      readSubject: new ReplaySubject<Uint8Array>(),
-      writeSubject: new Subject<Uint8Array>(),
-      index: 1
-    };
-    const mockConnection2: SerialConnection = {
-      port: {
-        getSignals: () => { return Promise.resolve({ dataCarrierDetect: true, clearToSend: true, ringIndicator: true, dataSetReady: true }); },
-        getInfo: () => { return { usbProductId: 0x8037, usbVendorId: 0x2342, usbManufacturerName: "Arduino (www.arduino.cc)", usbProductName: "Arduino Micro 2" } },
-        open: () => { return Promise.resolve() },
-        close: () => { return Promise.resolve() },
-        setSignals: () => { return Promise.resolve() },
-        readable: {
-          getReader: (): ReadableStreamDefaultReader => {
-            return {
-              read: () => {
-              },
-              releaseLock: () => { },
-              cancel: () => { },
-              closed: () => { }
-            } as any as ReadableStreamDefaultReader
-          }
-        } as ReadableStream,
-        writable: null
-      } as any as SerialPort,
-      readSubject: new ReplaySubject<Uint8Array>(),
-      writeSubject: new Subject<Uint8Array>(),
-      index: 2
-    };
-    const mockConnection3: SerialConnection = {
-      port: {
-        getSignals: () => { return Promise.resolve({ dataCarrierDetect: true, clearToSend: true, ringIndicator: true, dataSetReady: true }); },
-        getInfo: () => { return { usbProductId: 0x8037, usbVendorId: 0x2342, usbManufacturerName: "Arduino (www.arduino.cc)", usbProductName: "Arduino Micro 3" } },
-        open: () => { return Promise.resolve() },
-        close: () => { return Promise.resolve() },
-        setSignals: () => { return Promise.resolve() },
-        readable: {
-          getReader: (): ReadableStreamDefaultReader => {
-            return {
-              read: () => {
-              },
-              releaseLock: () => { },
-              cancel: () => { },
-              closed: () => { }
-            } as any as ReadableStreamDefaultReader
-          }
-        } as ReadableStream,
-        writable: null
-      } as any as SerialPort,
-      readSubject: new ReplaySubject<Uint8Array>(),
-      writeSubject: new Subject<Uint8Array>(),
-      index: 2
-    };
-    const subject = new BehaviorSubject<SerialConnection[]>([mockConnection1, mockConnection2, mockConnection3]);
-    return subject;
   }
 
   getConnectionLabel(connection: SerialConnection) {
     const { usbProductId, usbVendorId } = connection.port.getInfo();
     return `Port ${connection.index} - ${usbProductId} ${usbVendorId}`;
   }
-
 }
